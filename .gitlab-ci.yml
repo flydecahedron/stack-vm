@@ -1,0 +1,11 @@
+cargo-test:
+  image: rust:latest
+  variables:
+    CARGO_HOME: "$CI_PROJECT_DIR/cache/"
+  cache:
+    paths:
+      - "cache"
+  before_script:
+    - rustc -V
+  script:
+    - cargo test
