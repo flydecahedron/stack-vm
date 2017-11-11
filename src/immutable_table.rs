@@ -1,12 +1,10 @@
 use std::collections::HashMap;
-use std::boxed::Box;
-use object::Object;
 use table::Table;
 
-pub struct ImmutableTable(HashMap<String, Box<Object>>);
+pub struct ImmutableTable<T>(HashMap<String, T>);
 
-impl ImmutableTable {
-    pub fn new() -> ImmutableTable {
+impl<T> ImmutableTable<T> {
+    pub fn new() -> ImmutableTable<T> {
         ImmutableTable(HashMap::new())
     }
 
@@ -17,8 +15,10 @@ impl ImmutableTable {
     }
 }
 
-impl Table for ImmutableTable {
-    fn insert(&mut self, name: &str, value: Box<Object>) {
+impl<T> Table for ImmutableTable<T> {
+    type Item = T;
+
+    fn insert(&mut self, name: &str, value: T) {
         self.already_exists_guard(name);
         let name = String::from(name);
         self.0.insert(name, value);
@@ -32,7 +32,7 @@ impl Table for ImmutableTable {
         self.0.contains_key(name)
     }
 
-    fn get(&self, name: &str) -> Option<&Box<Object>> {
+    fn get(&self, name: &str) -> Option<&T> {
         self.0.get(name)
     }
 }
@@ -43,27 +43,32 @@ mod test {
     use super::*;
 
     struct Canary(usize);
-
-    impl Object for Canary {}
+    impl Canary {
+        fn to_i(&self) -> usize {
+            self.0
+        }
+    }
 
     #[test]
     fn new() {
-        let immutable_table = ImmutableTable::new();
+        let immutable_table: ImmutableTable<Canary> = ImmutableTable::new();
         assert!(immutable_table.is_empty())
     }
 
     #[test]
     fn insert() {
-        let mut immutable_table = ImmutableTable::new();
-        immutable_table.insert("example", Box::new(Canary(13)));
+        let mut immutable_table: ImmutableTable<Canary> = ImmutableTable::new();
+        immutable_table.insert("example", Canary(13));
         assert!(!immutable_table.is_empty());
+        assert_eq!(immutable_table.get("example").unwrap().to_i(), 13);
     }
 
     #[test]
     #[should_panic(expected = "redefining constant")]
     fn insert_uniq() {
-        let mut immutable_table = ImmutableTable::new();
-        immutable_table.insert("example", Box::new(Canary(13)));
-        immutable_table.insert("example", Box::new(Canary(13)));
+        let mut immutable_table: ImmutableTable<Canary> = ImmutableTable::new();
+        immutable_table.insert("example", Canary(13));
+        assert_eq!(immutable_table.get("example").unwrap().to_i(), 13);
+        immutable_table.insert("example", Canary(13));
     }
 }
