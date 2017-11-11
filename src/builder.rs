@@ -1,9 +1,12 @@
 use std::fmt;
 use instruction_table::InstructionTable;
+use immutable_table::ImmutableTable;
+use table::Table;
 
 pub struct Builder<'a, T: fmt::Display + 'a> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions:      Vec<usize>,
+    pub labels:            ImmutableTable<usize>,
     pub data:              Vec<T>,
 }
 
@@ -12,6 +15,7 @@ impl<'a, T: fmt::Display> Builder<'a, T> {
         Builder {
             instruction_table: &instruction_table,
             instructions:      vec![],
+            labels:            ImmutableTable::new(),
             data:              vec![],
         }
     }
@@ -31,6 +35,11 @@ impl<'a, T: fmt::Display> Builder<'a, T> {
             self.data.push(arg);
             self.instructions.push(self.data.len() - 1);
         }
+    }
+
+    pub fn label(&mut self, name: &str) {
+        let idx = self.instructions.len();
+        self.labels.insert(name, idx);
     }
 
     pub fn len(&self) -> usize {
@@ -115,6 +124,15 @@ mod test {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
         builder.push(0, vec![1]);
+    }
+
+    #[test]
+    fn label() {
+        let it = example_instruction_table();
+        let mut builder: Builder<usize> = Builder::new(&it);
+        builder.push(0, vec![]);
+        builder.label("wow");
+        assert_eq!(*builder.labels.get("wow").unwrap(), 1);
     }
 
     #[test]

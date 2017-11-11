@@ -3,7 +3,7 @@ use table::Table;
 
 pub struct Frame<T> {
     locals: MutableTable<T>,
-    return_address: usize
+    pub return_address: usize
 }
 
 impl<T> Frame<T> {
