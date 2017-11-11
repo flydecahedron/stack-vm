@@ -4,7 +4,7 @@ use instruction_table::InstructionTable;
 pub struct Builder<'a, T: fmt::Display + 'a> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions:      Vec<usize>,
-    pub constants:         Vec<T>,
+    pub data:              Vec<T>,
 }
 
 impl<'a, T: fmt::Display> Builder<'a, T> {
@@ -12,7 +12,7 @@ impl<'a, T: fmt::Display> Builder<'a, T> {
         Builder {
             instruction_table: &instruction_table,
             instructions:      vec![],
-            constants:         vec![],
+            data:              vec![],
         }
     }
 
@@ -28,8 +28,8 @@ impl<'a, T: fmt::Display> Builder<'a, T> {
 
         self.instructions.push(instr.op_code);
         for arg in args {
-            self.constants.push(arg);
-            self.instructions.push(self.constants.len() - 1);
+            self.data.push(arg);
+            self.instructions.push(self.data.len() - 1);
         }
     }
 
@@ -42,11 +42,11 @@ impl<'a, T: fmt::Display> fmt::Display for Builder<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut result = String::new();
 
-        for i in 0..self.constants.len() {
-            result.push_str(&format!("@{} = {}\n", i, self.constants[i]));
+        for i in 0..self.data.len() {
+            result.push_str(&format!("@{} = {}\n", i, self.data[i]));
         }
 
-        if self.constants.len() > 0 {
+        if self.data.len() > 0 {
             result.push_str("\n");
         }
 

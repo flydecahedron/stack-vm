@@ -5,11 +5,11 @@ use table::Table;
 use builder::Builder;
 
 pub struct Machine<'a, T: 'a + fmt::Display> {
-    builder: Builder<'a, T>,
-    ip: usize,
-    constants: &'a Table<Item = T>,
-    call_stack: Stack<Frame<'a, T>>,
-    operand_stack: Stack<T>,
+    pub builder: Builder<'a, T>,
+    pub ip: usize,
+    pub constants: &'a Table<Item = T>,
+    pub call_stack: Stack<Frame<'a, T>>,
+    pub operand_stack: Stack<T>,
 }
 
 impl<'a, T: 'a + fmt::Display> Machine<'a, T> {
@@ -59,7 +59,7 @@ mod test {
     use instruction_table::InstructionTable;
 
     fn push(machine: &mut Machine<usize>, args: &[usize]) {
-        let arg = machine.builder.constants.get(args[0]).unwrap();
+        let arg = machine.builder.data.get(args[0]).unwrap();
         machine.operand_stack.push(*arg);
     }
 
@@ -95,7 +95,7 @@ mod test {
         builder.push(1, vec![3]);
         builder.push(2, vec![]);
         let constants: MutableTable<usize> = MutableTable::new();
-        let mut machine = Machine::new(builder, &constants);
+        let machine = Machine::new(builder, &constants);
         let mut machine = Machine::run(machine);
         let result = machine.operand_stack.pop();
         assert_eq!(result, 5);
