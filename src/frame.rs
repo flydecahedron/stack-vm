@@ -1,13 +1,13 @@
 use table::Table;
 use mutable_table::MutableTable;
 
-pub struct Frame<'a> {
-    constants: &'a Table,
-    locals: MutableTable
+pub struct Frame<'a, T: 'a> {
+    constants: &'a Table<Item = T>,
+    locals: MutableTable<T>
 }
 
-impl<'a> Frame<'a> {
-    pub fn new(constants: &'a Table) -> Frame<'a> {
+impl<'a, T: 'a> Frame<'a, T> {
+    pub fn new(constants: &'a Table<Item = T>) -> Frame<'a, T> {
         Frame {
             constants: constants,
             locals: MutableTable::new()
@@ -23,15 +23,15 @@ mod test {
 
     #[test]
     fn new_has_constants() {
-        let constants = ImmutableTable::new();
-        let frame = Frame::new(&constants);
+        let constants: ImmutableTable<usize> = ImmutableTable::new();
+        let frame: Frame<usize> = Frame::new(&constants);
         assert!(frame.constants.is_empty())
     }
 
     #[test]
     fn new_has_locals() {
-        let constants = ImmutableTable::new();
-        let frame = Frame::new(&constants);
+        let constants: ImmutableTable<usize> = ImmutableTable::new();
+        let frame: Frame<usize> = Frame::new(&constants);
         assert!(frame.locals.is_empty())
     }
 }

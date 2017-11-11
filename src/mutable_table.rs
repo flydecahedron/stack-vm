@@ -1,18 +1,18 @@
 use std::collections::HashMap;
-use std::boxed::Box;
 use table::Table;
-use object::Object;
 
-pub struct MutableTable(HashMap<String, Box<Object>>);
+pub struct MutableTable<T>(HashMap<String, T>);
 
-impl MutableTable {
-    pub fn new() ->MutableTable {
+impl<T> MutableTable<T> {
+    pub fn new() ->MutableTable<T> {
         MutableTable(HashMap::new())
     }
 }
 
-impl Table for MutableTable {
-    fn insert(&mut self, name: &str, value: Box<Object>) {
+impl<T> Table for MutableTable<T> {
+    type Item = T;
+
+    fn insert(&mut self, name: &str, value: T) {
         let name = String::from(name);
         self.0.insert(name, value);
     }
@@ -25,7 +25,7 @@ impl Table for MutableTable {
         self.0.contains_key(name)
     }
 
-    fn get(&self, name: &str) -> Option<&Box<Object>> {
+    fn get(&self, name: &str) -> Option<&T> {
         self.0.get(name)
     }
 }
@@ -35,26 +35,32 @@ mod test {
     use super::*;
 
     struct Canary(usize);
-
-    impl Object for Canary {}
+    impl Canary {
+        fn to_i(&self) -> usize {
+            self.0
+        }
+    }
 
     #[test]
     fn new() {
-        let mutable_table = MutableTable::new();
+        let mutable_table: MutableTable<Canary> = MutableTable::new();
         assert!(mutable_table.is_empty())
     }
 
     #[test]
     fn insert() {
-        let mut mutable_table = MutableTable::new();
-        mutable_table.insert("example", Box::new(Canary(13)));
+        let mut mutable_table: MutableTable<Canary> = MutableTable::new();
+        mutable_table.insert("example", Canary(13));
         assert!(!mutable_table.is_empty());
+        assert_eq!(mutable_table.get("example").unwrap().to_i(), 13);
     }
 
     #[test]
     fn insert_is_mutable() {
-        let mut mutable_table = MutableTable::new();
-        mutable_table.insert("example", Box::new(Canary(13)));
-        mutable_table.insert("example", Box::new(Canary(14)));
+        let mut mutable_table:MutableTable<Canary> = MutableTable::new();
+        mutable_table.insert("example", Canary(13));
+        assert_eq!(mutable_table.get("example").unwrap().to_i(), 13);
+        mutable_table.insert("example", Canary(14));
+        assert_eq!(mutable_table.get("example").unwrap().to_i(), 14);
     }
 }
