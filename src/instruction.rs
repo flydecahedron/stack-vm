@@ -1,16 +1,20 @@
-#[derive(Debug, Clone, PartialEq)]
-pub struct Instruction {
+use std::fmt;
+use machine::Machine;
+
+pub struct Instruction<T: fmt::Display> {
     pub op_code: usize,
     pub name:    String,
-    pub arity:   usize
+    pub arity:   usize,
+    pub fun:     fn(&mut Machine<T>, &[usize])
 }
 
-impl Instruction {
-    pub fn new(op_code: usize, name: &str, arity: usize) -> Instruction {
+impl<T: fmt::Display> Instruction<T> {
+    pub fn new(op_code: usize, name: &str, arity: usize, fun: fn(&mut Machine<T>, &[usize])) -> Instruction<T> {
         Instruction {
             op_code: op_code,
             name: String::from(name),
-            arity: arity
+            arity: arity,
+            fun: fun
         }
 
     }
@@ -18,6 +22,4 @@ impl Instruction {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
 }
