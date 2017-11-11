@@ -80,6 +80,21 @@ impl<'a, T: 'a + fmt::Display> Machine<'a, T> {
             .get(idx)
             .expect(&format!("Constant data is not present at index {}.", idx))
     }
+
+    pub fn jump(&mut self, label: &str) {
+        let new_ip = self.builder
+            .labels
+            .get(label)
+            .expect(&format!("Attempt to jump to unknown label {}", label));
+        let old_ip = self.ip;
+        self.call_stack.push(Frame::new(old_ip));
+        self.ip = *new_ip;
+    }
+
+    pub fn ret(&mut self) {
+        let frame = self.call_stack.pop();
+        self.ip = frame.return_address;
+    }
 }
 
 #[cfg(test)]
