@@ -22,38 +22,31 @@ impl<T> Stack<T> {
 mod test {
     use super::*;
 
-    struct Canary(usize);
-    impl Canary {
-        fn to_i(&self) -> usize {
-            self.0
-        }
-    }
-
     #[test]
     fn new() {
-        let stack: Stack<Canary> = Stack::new();
+        let stack: Stack<usize> = Stack::new();
         assert!(stack.is_empty());
     }
 
     #[test]
     fn push() {
-        let mut stack: Stack<Canary> = Stack::new();
-        stack.push(Canary(13));
+        let mut stack: Stack<usize> = Stack::new();
+        stack.push(13);
         assert!(!stack.is_empty());
     }
 
     #[test]
     fn pop() {
-        let mut stack: Stack<Canary> = Stack::new();
-        stack.push(Canary(13));
-        let value = stack.pop().to_i();
+        let mut stack: Stack<usize> = Stack::new();
+        stack.push(13);
+        let value = stack.pop();
         assert_eq!(value, 13);
     }
 
     #[test]
     #[should_panic(expected = "empty stack")]
     fn empty_pop() {
-        let mut stack: Stack<Canary> = Stack::new();
+        let mut stack: Stack<usize> = Stack::new();
         stack.pop();
     }
 }

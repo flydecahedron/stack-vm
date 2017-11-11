@@ -1,24 +1,25 @@
 use instruction::Instruction;
 use std::collections::HashMap;
+use std::fmt;
 
-pub struct InstructionTable(HashMap<usize, Instruction>);
+pub struct InstructionTable<T: fmt::Display>(HashMap<usize, Instruction<T>>);
 
-impl InstructionTable {
-    pub fn new() -> InstructionTable {
+impl<T: fmt::Display> InstructionTable<T> {
+    pub fn new() -> InstructionTable<T> {
         InstructionTable(HashMap::new())
     }
 
-    pub fn by_op_code(&self, op_code: usize) -> Option<&Instruction> {
+    pub fn by_op_code(&self, op_code: usize) -> Option<&Instruction<T>> {
         self.0.get(&op_code)
     }
 
-    pub fn by_name(&self, name: &str) -> Option<&Instruction> {
+    pub fn by_name(&self, name: &str) -> Option<&Instruction<T>> {
         self.0
             .values()
             .find(|ref instr| instr.name == name)
     }
 
-    pub fn insert(&mut self, instr: Instruction) {
+    pub fn insert(&mut self, instr: Instruction<T>) {
         self.0.insert(instr.op_code, instr);
     }
 
@@ -30,18 +31,21 @@ impl InstructionTable {
 #[cfg(test)]
 mod test {
     use super::*;
+    use machine::Machine;
+
+    fn noop(_machine: &mut Machine<usize>, _args: &[usize]) {}
 
     #[test]
     fn new() {
-        let table = InstructionTable::new();
+        let table: InstructionTable<usize> = InstructionTable::new();
         assert!(table.is_empty())
     }
 
     #[test]
     fn insert() {
-        let mut table = InstructionTable::new();
+        let mut table: InstructionTable<usize> = InstructionTable::new();
         assert!(table.is_empty());
-        table.insert(Instruction::new(0, "NOOP", 0));
+        table.insert(Instruction::new(0, "NOOP", 0, noop));
         assert!(!table.is_empty());
     }
 }
