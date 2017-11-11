@@ -6,4 +6,3 @@ authors = ["James Harton <james@rabidtech.co.nz>"]
 [dependencies]
 rug = "0.8.0"
 nom = "3.2.1"
-lazy_static = "0.2"
