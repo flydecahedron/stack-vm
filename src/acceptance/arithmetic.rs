@@ -1,32 +1,32 @@
 use super::super::*;
 
 fn push(machine: &mut Machine<f64>, args: &[usize]) {
-    let arg = machine.builder.data.get(args[0]).unwrap();
-    machine.operand_stack.push(*arg)
+    let arg = machine.builder.data[args[0]];
+    machine.operand_push(arg)
 }
 
 fn add(machine: &mut Machine<f64>, _args: &[usize]) {
-    let rhs = machine.operand_stack.pop();
-    let lhs = machine.operand_stack.pop();
-    machine.operand_stack.push(lhs + rhs);
+    let rhs = machine.operand_pop();
+    let lhs = machine.operand_pop();
+    machine.operand_push(lhs + rhs);
 }
 
 fn sub(machine: &mut Machine<f64>, _args: &[usize]) {
-    let rhs = machine.operand_stack.pop();
-    let lhs = machine.operand_stack.pop();
-    machine.operand_stack.push(lhs - rhs);
+    let rhs = machine.operand_pop();
+    let lhs = machine.operand_pop();
+    machine.operand_push(lhs - rhs);
 }
 
 fn div(machine: &mut Machine<f64>, _args: &[usize]) {
-    let rhs = machine.operand_stack.pop();
-    let lhs = machine.operand_stack.pop();
-    machine.operand_stack.push(lhs / rhs);
+    let rhs = machine.operand_pop();
+    let lhs = machine.operand_pop();
+    machine.operand_push(lhs / rhs);
 }
 
 fn mult(machine: &mut Machine<f64>, _args: &[usize]) {
-    let rhs = machine.operand_stack.pop();
-    let lhs = machine.operand_stack.pop();
-    machine.operand_stack.push(lhs * rhs);
+    let rhs = machine.operand_pop();
+    let lhs = machine.operand_pop();
+    machine.operand_push(lhs * rhs);
 }
 
 fn instruction_table() -> InstructionTable<f64> {
@@ -51,7 +51,7 @@ fn addition_example() {
     let constants: MutableTable<f64> = MutableTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
-    let result = machine.operand_stack.pop();
+    let result = machine.operand_pop();
     assert_eq!(result, 9.0);
 }
 
@@ -67,7 +67,7 @@ fn subtraction_example() {
     let constants: MutableTable<f64> = MutableTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
-    let result = machine.operand_stack.pop();
+    let result = machine.operand_pop();
     assert_eq!(result, 5.0);
 }
 
@@ -81,7 +81,7 @@ fn division_example() {
     let constants: MutableTable<f64> = MutableTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
-    let result = machine.operand_stack.pop();
+    let result = machine.operand_pop();
     assert_eq!(result, 0.75);
 }
 
@@ -95,6 +95,6 @@ fn multiplication_example() {
     let constants: MutableTable<f64> = MutableTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
-    let result = machine.operand_stack.pop();
+    let result = machine.operand_pop();
     assert_eq!(result, 12.0);
 }
