@@ -34,33 +34,26 @@ mod test {
     use table::Table;
     use super::*;
 
-    struct Canary(usize);
-    impl Canary {
-        fn to_i(&self) -> usize {
-            self.0
-        }
-    }
-
     #[test]
     fn new() {
-        let mutable_table: MutableTable<Canary> = MutableTable::new();
+        let mutable_table: MutableTable<usize> = MutableTable::new();
         assert!(mutable_table.is_empty())
     }
 
     #[test]
     fn insert() {
-        let mut mutable_table: MutableTable<Canary> = MutableTable::new();
-        mutable_table.insert("example", Canary(13));
+        let mut mutable_table: MutableTable<usize> = MutableTable::new();
+        mutable_table.insert("example", 13);
         assert!(!mutable_table.is_empty());
-        assert_eq!(mutable_table.get("example").unwrap().to_i(), 13);
+        assert_eq!(*mutable_table.get("example").unwrap(), 13);
     }
 
     #[test]
     fn insert_is_mutable() {
-        let mut mutable_table:MutableTable<Canary> = MutableTable::new();
-        mutable_table.insert("example", Canary(13));
-        assert_eq!(mutable_table.get("example").unwrap().to_i(), 13);
-        mutable_table.insert("example", Canary(14));
-        assert_eq!(mutable_table.get("example").unwrap().to_i(), 14);
+        let mut mutable_table:MutableTable<usize> = MutableTable::new();
+        mutable_table.insert("example", 13);
+        assert_eq!(*mutable_table.get("example").unwrap(), 13);
+        mutable_table.insert("example", 14);
+        assert_eq!(*mutable_table.get("example").unwrap(), 14);
     }
 }
