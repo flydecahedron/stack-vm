@@ -8,21 +8,24 @@ pub struct Machine<'a, T: 'a + fmt::Display> {
     pub builder: Builder<'a, T>,
     pub ip: usize,
     pub constants: &'a Table<Item = T>,
-    pub call_stack: Stack<Frame<'a, T>>,
+    pub call_stack: Stack<Frame<T>>,
     pub operand_stack: Stack<T>,
 }
 
 impl<'a, T: 'a + fmt::Display> Machine<'a, T> {
     pub fn new(builder: Builder<'a, T>, constants: &'a Table<Item = T>) -> Machine<'a, T> {
+        let frame: Frame<T> = Frame::new(0);
+        let mut call_stack = Stack::new();
+        call_stack.push(frame);
+
         Machine{
-            builder: builder,
-            ip: 0,
-            constants: constants,
-            call_stack: Stack::new(),
+            builder:       builder,
+            ip:            0,
+            constants:     constants,
+            call_stack:    call_stack,
             operand_stack: Stack::new()
         }
     }
-
 
     pub fn run(mut machine: Machine<'a, T>) -> Machine<'a, T> {
         loop {
@@ -48,13 +51,41 @@ impl<'a, T: 'a + fmt::Display> Machine<'a, T> {
         }
         machine
     }
+
+    pub fn get_local(&self, name: &str) -> Option<&T> {
+        self.call_stack
+            .peek()
+            .get_local(name)
+    }
+
+    pub fn set_local(&mut self, name: &str, value: T) {
+        self.call_stack
+            .peek_mut()
+            .set_local(name, value)
+    }
+
+    pub fn operand_push(&mut self, value: T) {
+        self.operand_stack
+            .push(value);
+    }
+
+    pub fn operand_pop(&mut self) -> T {
+        self.operand_stack
+            .pop()
+    }
+
+    pub fn get_data(&self, idx: usize) -> &T {
+        self.builder
+            .data
+            .get(idx)
+            .expect(&format!("Constant data is not present at index {}.", idx))
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
     use mutable_table::MutableTable;
-
     use instruction::Instruction;
     use instruction_table::InstructionTable;
 
@@ -64,8 +95,8 @@ mod test {
     }
 
     fn add(machine: &mut Machine<usize>, _args: &[usize]) {
-        let rhs = machine.operand_stack.pop();
-        let lhs = machine.operand_stack.pop();
+        let rhs = machine.operand_pop();
+        let lhs = machine.operand_pop();
         machine.operand_stack.push(lhs + rhs);
     }
 
@@ -83,7 +114,7 @@ mod test {
         let constants: MutableTable<usize> = MutableTable::new();
         let machine = Machine::new(builder, &constants);
         assert_eq!(machine.ip, 0);
-        assert!(machine.call_stack.is_empty());
+        assert!(!machine.call_stack.is_empty());
         assert!(machine.operand_stack.is_empty());
     }
 
@@ -99,5 +130,25 @@ mod test {
         let mut machine = Machine::run(machine);
         let result = machine.operand_stack.pop();
         assert_eq!(result, 5);
+    }
+
+    #[test]
+    fn get_local() {
+        let it = instruction_table();
+        let builder: Builder<usize> = Builder::new(&it);
+        let constants: MutableTable<usize> = MutableTable::new();
+        let machine = Machine::new(builder, &constants);
+        assert!(machine.get_local("example").is_none());
+    }
+
+    #[test]
+    fn set_local() {
+        let it = instruction_table();
+        let builder: Builder<usize> = Builder::new(&it);
+        let constants: MutableTable<usize> = MutableTable::new();
+        let mut machine = Machine::new(builder, &constants);
+        assert!(machine.get_local("example").is_none());
+        machine.set_local("example", 13);
+        assert_eq!(*machine.get_local("example").unwrap(), 13);
     }
 }

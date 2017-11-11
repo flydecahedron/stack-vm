@@ -16,6 +16,18 @@ impl<T> Stack<T> {
     pub fn pop(&mut self) -> T {
         self.0.pop().expect("Unable to pop from empty stack!")
     }
+
+    pub fn peek(&self) -> &T {
+        let len = self.0.len();
+        if len == 0 { panic!("Cannot peek into empty stack!") }
+        &self.0[len - 1]
+    }
+
+    pub fn peek_mut(&mut self) -> &mut T {
+        let len = self.0.len();
+        if len == 0 { panic!("Cannot peek into empty stack!") }
+        &mut self.0[len - 1]
+    }
 }
 
 #[cfg(test)]
@@ -48,5 +60,19 @@ mod test {
     fn empty_pop() {
         let mut stack: Stack<usize> = Stack::new();
         stack.pop();
+    }
+
+    #[test]
+    fn peek() {
+        let mut stack: Stack<usize> = Stack::new();
+        stack.push(13);
+        assert_eq!(*stack.peek(), 13)
+    }
+
+    #[test]
+    #[should_panic(expected = "empty stack")]
+    fn empty_peek() {
+        let stack: Stack<usize> = Stack::new();
+        stack.peek();
     }
 }
