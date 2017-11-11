@@ -42,33 +42,26 @@ mod test {
     use table::Table;
     use super::*;
 
-    struct Canary(usize);
-    impl Canary {
-        fn to_i(&self) -> usize {
-            self.0
-        }
-    }
-
     #[test]
     fn new() {
-        let immutable_table: ImmutableTable<Canary> = ImmutableTable::new();
+        let immutable_table: ImmutableTable<usize> = ImmutableTable::new();
         assert!(immutable_table.is_empty())
     }
 
     #[test]
     fn insert() {
-        let mut immutable_table: ImmutableTable<Canary> = ImmutableTable::new();
-        immutable_table.insert("example", Canary(13));
+        let mut immutable_table: ImmutableTable<usize> = ImmutableTable::new();
+        immutable_table.insert("example", 13);
         assert!(!immutable_table.is_empty());
-        assert_eq!(immutable_table.get("example").unwrap().to_i(), 13);
+        assert_eq!(*immutable_table.get("example").unwrap(), 13);
     }
 
     #[test]
     #[should_panic(expected = "redefining constant")]
     fn insert_uniq() {
-        let mut immutable_table: ImmutableTable<Canary> = ImmutableTable::new();
-        immutable_table.insert("example", Canary(13));
-        assert_eq!(immutable_table.get("example").unwrap().to_i(), 13);
-        immutable_table.insert("example", Canary(13));
+        let mut immutable_table: ImmutableTable<usize> = ImmutableTable::new();
+        immutable_table.insert("example", 13);
+        assert_eq!(*immutable_table.get("example").unwrap(), 13);
+        immutable_table.insert("example", 13);
     }
 }
