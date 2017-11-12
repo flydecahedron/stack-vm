@@ -31,7 +31,6 @@ use table::Table;
 /// * a list of instructions that have been pushed into this builder.
 /// * a `Table` of labels used for jumping.
 /// * a list of `T` to be stored in the builder's data section.
-#[derive(Debug)]
 pub struct Builder<'a, T: 'a + fmt::Debug> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions:      Vec<usize>,
@@ -92,44 +91,48 @@ impl<'a, T: fmt::Debug>  Builder<'a, T> {
     }
 }
 
-// impl<'a, T: fmt::Debug> fmt::Display for Builder<'a, T> {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         let mut result = String::new();
+impl<'a, T: 'a + fmt::Debug> fmt::Debug for Builder<'a, T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut result = String::new();
 
-//         for i in 0..self.data.len() {
-//             result.push_str(&format!("@{} = {}\n", i, self.data[i]));
-//         }
+        for i in 0..self.data.len() {
+            result.push_str(&format!("@{} = {:?}\n", i, self.data[i]));
+        }
 
-//         if self.data.len() > 0 {
-//             result.push_str("\n");
-//         }
+        let mut ip = 0;
+        let len = self.instructions.len();
+        loop {
+            if ip == len { break; }
 
-//         let mut i = 0;
-//         let len = self.instructions.len();
-//         loop {
-//             if i == len { break; }
+            for label in self.labels.keys() {
+                let idx = *self.labels.get(label).unwrap();
+                if idx == ip {
+                    result.push_str(&format!("\n.{}:\n", label));
+                }
+            }
 
-//             let op_code = self.instructions[i];
+            let op_code = self.instructions[ip];
 
-//             let instr = self
-//                 .instruction_table
-//                 .by_op_code(op_code)
-//                 .expect(&format!("Unable to find instruction with op code {}", op_code));
-//             result.push_str(&instr.name);
+            let instr = self
+                .instruction_table
+                .by_op_code(op_code)
+                .expect(&format!("Unable to find instruction with op code {}", op_code));
 
-//             for _j in 0..instr.arity {
-//                 i = i + 1;
-//                 let const_idx = self.instructions[i];
-//                 result.push_str(&format!(" @{}", const_idx));
-//             }
-//             result.push_str("\n");
+            result.push_str(&format!("\t{}", &instr.name));
 
-//             i = i + 1;
-//         }
+            for _j in 0..instr.arity {
+                ip = ip + 1;
+                let const_idx = self.instructions[ip];
+                result.push_str(&format!(" @{}", const_idx));
+            }
+            result.push_str("\n");
 
-//         write!(f, "{}", result)
-//     }
-// }
+            ip = ip + 1;
+        }
+
+        write!(f, "{}", result)
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -180,23 +183,28 @@ mod test {
         assert_eq!(*builder.labels.get("wow").unwrap(), 1);
     }
 
-//     #[test]
-//     fn builder_string_format() {
-//         let it = example_instruction_table();
-//         let mut builder: Builder<usize> = Builder::new(&it);
-//         builder.push(0, vec![]);
-//         builder.push(1, vec![123]);
-//         builder.push(1, vec![456]);
-//         builder.push(2, vec![]);
-//         let actual = format!("{}", builder);
-//         let expected = "@0 = 123
-// @1 = 456
+    #[test]
+    fn debug_format() {
+        let it = example_instruction_table();
+        let mut builder: Builder<usize> = Builder::new(&it);
+        builder.push(0, vec![]);
+        builder.push(1, vec![123]);
+        builder.push(1, vec![456]);
+        builder.label("some_function");
+        builder.push(2, vec![]);
 
-// noop
-// push @0
-// push @1
-// pop
-// ";
-//         assert_eq!(actual, expected);
-//     }
+        let actual = format!("{:?}", builder);
+        let expected = "@0 = 123
+@1 = 456
+
+.main:
+\tnoop
+\tpush @0
+\tpush @1
+
+.some_function:
+\tpop
+";
+        assert_eq!(actual, expected);
+    }
 }

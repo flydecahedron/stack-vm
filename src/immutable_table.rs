@@ -40,6 +40,12 @@ impl<T> ImmutableTable<T> {
             panic!("Error: redefining constant {} not allowed.", name);
         }
     }
+
+    pub fn keys(&self) -> Vec<&String> {
+        let mut result = vec![];
+        self.0.keys().for_each(|ref k| result.push(k.clone()));
+        result
+    }
 }
 
 impl<T> Table for ImmutableTable<T> {
