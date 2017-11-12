@@ -1,9 +1,21 @@
+//! The machine that makes the magic happen.
+//!
+//! Pour all your ingredients into `Machine` and make it dance.
+
 use std::fmt;
 use stack::Stack;
 use frame::Frame;
 use table::Table;
 use builder::Builder;
 
+/// `Machine` contains all the information needed to run your program.
+///
+/// * A `Builder`, used describe the source instructions and data to execute.
+/// * An instruction pointer, which points to the currently-executing
+///   instruciton.
+/// * A `Table` of constants, which you can use in your instructions if needed.
+/// * A `Stack` of `Frame` used to keep track of calls being executed.
+/// * A `Stack` of `T` which is used as the main operand stack.
 pub struct Machine<'a, T: 'a + fmt::Display + fmt::Debug> {
     pub builder: Builder<'a, T>,
     pub ip: usize,
@@ -13,6 +25,10 @@ pub struct Machine<'a, T: 'a + fmt::Display + fmt::Debug> {
 }
 
 impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
+    /// Returns a new `Machine` ready to execute instructions.
+    ///
+    /// The machine is initialised by passing in your `Builder` which contains
+    /// all the code and data of your program, and a `Table` of constants.
     pub fn new(builder: Builder<'a, T>, constants: &'a Table<Item = T>) -> Machine<'a, T> {
         let frame: Frame<T> = Frame::new(builder.instructions.len());
         let mut call_stack = Stack::new();
@@ -27,6 +43,16 @@ impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
         }
     }
 
+    /// Run the machine.
+    ///
+    /// Kick off the process of running the program.
+    ///
+    /// Steps through the instructions in your program executing them
+    /// one-by-one.  Each instruction function is executed, much like a
+    /// callback.
+    ///
+    /// Stops when either the last instruction is executed or when the
+    /// last frame is removed from the call stack.
     pub fn run(mut machine: Machine<'a, T>) -> Machine<'a, T> {
         loop {
             if machine.ip == machine.builder.len() { break; }
@@ -53,28 +79,38 @@ impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
         machine
     }
 
+    /// Look up a local variable in the current call frame.
+    ///
+    /// Note that the variable may not be set in the current frame but it's up
+    /// to your instruction to figure out how to deal with this situation.
     pub fn get_local(&self, name: &str) -> Option<&T> {
         self.call_stack
             .peek()
             .get_local(name)
     }
 
+    /// Set a local variable in the current call frame.
+    ///
+    /// Places a value in the frame's local variable table.
     pub fn set_local(&mut self, name: &str, value: T) {
         self.call_stack
             .peek_mut()
             .set_local(name, value)
     }
 
+    /// Push an operand onto the operand stack.
     pub fn operand_push(&mut self, value: T) {
         self.operand_stack
             .push(value);
     }
 
+    /// Pop an operand off the operand stack.
     pub fn operand_pop(&mut self) -> T {
         self.operand_stack
             .pop()
     }
 
+    /// Retrieve a reference to a `T` stored in the builder's data section.
     pub fn get_data(&self, idx: usize) -> &T {
         self.builder
             .data
@@ -82,6 +118,15 @@ impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
             .expect(&format!("Constant data is not present at index {}.", idx))
     }
 
+    /// Perform a jump to a named label.
+    ///
+    /// This method performs the following actions:
+    /// * Retrieve the instruction pointer for a given label from the builder.
+    /// * Create a new frame with it's return address set to the current
+    ///   instruction pointer.
+    /// * Push the new frame onto the call stack.
+    ///
+    /// This method specifically does not transfer operands to call arguments.
     pub fn jump(&mut self, label: &str) {
         let new_ip = self.builder
             .labels
@@ -92,6 +137,12 @@ impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
         self.ip = *new_ip;
     }
 
+    /// Performs a return.
+    ///
+    /// This method pops the top frame off the call stack and moves the
+    /// instruction pointer back to the frame's return address.
+    /// It's up to you to push your return value onto the operand stack (if
+    /// your language has such return semantics).
     pub fn ret(&mut self) {
         let frame = self.call_stack.pop();
         self.ip = frame.return_address;

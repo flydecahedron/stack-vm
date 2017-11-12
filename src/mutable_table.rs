@@ -1,10 +1,35 @@
+//! A key/value table using strings as keys.
+
 use std::collections::HashMap;
 use table::Table;
 
+/// A table which allows values to be overwritten.
+/// Useful for your language's local variables, etc.
+///
+/// ```
+/// use stack_vm::{MutableTable, Table};
+/// let mut table: MutableTable<usize> = MutableTable::new();
+/// assert!(table.is_empty());
+///
+/// table.insert("example", 13);
+/// assert!(!table.is_empty());
+///
+/// assert!(table.contains_key("example"));
+///
+/// let value = *table.get("example").unwrap();
+/// assert_eq!(value, 13);
+///
+/// table.insert("example", 14);
+/// assert!(table.contains_key("example"));
+///
+/// let value = *table.get("example").unwrap();
+/// assert_eq!(value, 14);
+/// ```
 #[derive(Debug)]
 pub struct MutableTable<T>(HashMap<String, T>);
 
 impl<T> MutableTable<T> {
+    /// Return a new, empty `MutableTable`.
     pub fn new() ->MutableTable<T> {
         MutableTable(HashMap::new())
     }
