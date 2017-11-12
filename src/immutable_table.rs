@@ -1,10 +1,36 @@
+//! A key/value table using strings as keys.
+
 use std::collections::HashMap;
 use table::Table;
 
+/// A table which does not allow values to be overwritten.
+/// Useful for your languages constants, etc.
+///
+/// ```
+/// use stack_vm::{ImmutableTable, Table};
+/// let mut table: ImmutableTable<usize> = ImmutableTable::new();
+/// assert!(table.is_empty());
+///
+/// table.insert("example", 13);
+/// assert!(!table.is_empty());
+///
+/// assert!(table.contains_key("example"));
+///
+/// let value = *table.get("example").unwrap();
+/// assert_eq!(value, 13);
+/// ```
+///
+/// ```should_panic
+/// use stack_vm::{ImmutableTable, Table};
+/// let mut table: ImmutableTable<usize> = ImmutableTable::new();
+/// table.insert("example", 13);
+/// table.insert("example", 14);
+/// ```
 #[derive(Debug)]
 pub struct ImmutableTable<T>(HashMap<String, T>);
 
 impl<T> ImmutableTable<T> {
+    /// Return a new, empty `ImmutableTable`.
     pub fn new() -> ImmutableTable<T> {
         ImmutableTable(HashMap::new())
     }

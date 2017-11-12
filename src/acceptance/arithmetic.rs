@@ -1,34 +1,49 @@
+//! An Arithmetic Machine.
+//!
+//! This module contains an example of a basic calculator and tests which
+//! verify it's output.
+
 use super::super::*;
 
+/// Pushes an piece of data from the data section onto the operand stack.
 fn push(machine: &mut Machine<f64>, args: &[usize]) {
     let arg = machine.builder.data[args[0]];
     machine.operand_push(arg)
 }
 
+/// Pops two operands off the top of the stack, adds them together and
+/// pushes the result back onto the stack.
 fn add(machine: &mut Machine<f64>, _args: &[usize]) {
     let rhs = machine.operand_pop();
     let lhs = machine.operand_pop();
     machine.operand_push(lhs + rhs);
 }
 
+/// Pops two operands off the top of the stack, subtracts the first from the
+/// second and pushes the result back onto the stack.
 fn sub(machine: &mut Machine<f64>, _args: &[usize]) {
     let rhs = machine.operand_pop();
     let lhs = machine.operand_pop();
     machine.operand_push(lhs - rhs);
 }
 
+/// Pops two operands off the top of the stack, divides the first from the
+/// second and pushes the result back onto the stack.
 fn div(machine: &mut Machine<f64>, _args: &[usize]) {
     let rhs = machine.operand_pop();
     let lhs = machine.operand_pop();
     machine.operand_push(lhs / rhs);
 }
 
+/// Pops two operands off the top of the stack, multiples them together and
+/// pushes the result back onto the stack.
 fn mult(machine: &mut Machine<f64>, _args: &[usize]) {
     let rhs = machine.operand_pop();
     let lhs = machine.operand_pop();
     machine.operand_push(lhs * rhs);
 }
 
+/// Build an instruction table based on the instructions outlined above.
 fn instruction_table() -> InstructionTable<f64> {
     let mut it = InstructionTable::new();
     it.insert(Instruction::new(0, "push", 1, push));

@@ -1,8 +1,36 @@
+//! The instruction builder.
+//!
+//! Use this module to build code for your machine to execute.
+//!
+//! ## Examples
+//!
+//! ```
+//! use stack_vm::{Instruction, InstructionTable, Builder, Machine};
+//!
+//! fn push(machine: &mut Machine<f64>, args: &[usize]) {
+//!     let arg = machine.get_data(args[0]).clone();
+//!     machine.operand_push(arg)
+//! }
+//!
+//! let mut instruction_table: InstructionTable<f64> = InstructionTable::new();
+//! instruction_table.insert(Instruction::new(0, "push", 1, push));
+//!
+//! let mut builder: Builder<f64> = Builder::new(&instruction_table);
+//! builder.push(0, vec![1.23]);
+//! ```
+
 use std::fmt;
 use instruction_table::InstructionTable;
 use immutable_table::ImmutableTable;
 use table::Table;
 
+/// The builder struct.
+///
+/// Contains:
+/// * an `InstructionTable`.
+/// * a list of instructions that have been pushed into this builder.
+/// * a `Table` of labels used for jumping.
+/// * a list of `T` to be stored in the builder's data section.
 #[derive(Debug)]
 pub struct Builder<'a, T: 'a + fmt::Display + fmt::Debug> {
     pub instruction_table: &'a InstructionTable<T>,
@@ -12,6 +40,7 @@ pub struct Builder<'a, T: 'a + fmt::Display + fmt::Debug> {
 }
 
 impl<'a, T: fmt::Display + fmt::Debug>  Builder<'a, T> {
+    /// Create a new `Builder` from an `InstructionTable`.
     pub fn new(instruction_table: &'a InstructionTable<T>) -> Builder<T> {
         Builder {
             instruction_table: &instruction_table,
@@ -21,6 +50,12 @@ impl<'a, T: fmt::Display + fmt::Debug>  Builder<'a, T> {
         }
     }
 
+    /// Push an op-code into the code.
+    ///
+    /// * `op_code` should match that of an instruction in the
+    ///   `InstructionTable`.
+    /// * `args` a vector of operands to be pushed into the builder's data
+    ///   section.
     pub fn push(&mut self, op_code: usize, args: Vec<T>) {
         let instr = self
             .instruction_table
@@ -38,11 +73,18 @@ impl<'a, T: fmt::Display + fmt::Debug>  Builder<'a, T> {
         }
     }
 
+    /// Insert a label at this point in the code.
+    ///
+    /// Labels are used as targets for jumps.  When you call this method a
+    /// label is stored which points to the position of the next instruction.
     pub fn label(&mut self, name: &str) {
         let idx = self.instructions.len();
         self.labels.insert(name, idx);
     }
 
+    /// Return the length of the instructions vector.
+    ///
+    /// i.e. the number of instructions pushed so far.
     pub fn len(&self) -> usize {
         self.instructions.len()
     }

@@ -1,6 +1,19 @@
+//! A function-calling example.
+//!
+//! This module cntains an example of a machine with function calling
+//! behaviour.
+//!
+//! This is achieved by storing labels in the builder and jumping to those
+//! parts of the code during execution.
+//!
+//! Labels are stored as strings in the builder, so your operand type must have
+//! the ability to store strings so that we can use them to find the right
+//! label later on.
+
 use super::super::*;
 use std::fmt;
 
+/// Our operand type.  An enum to contain multiple types.
 #[derive(Clone, Debug)]
 enum Operand {
     I(i64),
@@ -32,26 +45,33 @@ impl fmt::Display for Operand {
     }
 }
 
+/// Pushes an piece of data from the data section onto the operand stack.
 fn push(machine: &mut Machine<Operand>, args: &[usize]) {
     let arg = machine.get_data(args[0]).clone();
     machine.operand_push(arg)
 }
 
+/// Pops two operands off the top of the stack, adds them together and
+/// pushes the result back onto the stack.
 fn add(machine: &mut Machine<Operand>, _args: &[usize]) {
     let rhs = machine.operand_pop().to_i().unwrap();
     let lhs = machine.operand_pop().to_i().unwrap();
     machine.operand_push(Operand::I(lhs + rhs));
 }
 
+/// Takes the name of a label from the data section and asks the interpreter
+/// to jump to it.
 fn call(machine: &mut Machine<Operand>, args: &[usize]) {
     let label = machine.get_data(args[0]).clone();
     machine.jump(label.to_s().unwrap());
 }
 
+/// Ask the interpreter to perform a return.
 fn ret(machine: &mut Machine<Operand>, _args: &[usize]) {
     machine.ret();
 }
 
+/// Generate an instruction table using the instructions outlined above.
 fn instruction_table() -> InstructionTable<Operand> {
     let mut it = InstructionTable::new();
     it.insert(Instruction::new(0, "push", 1, push));
