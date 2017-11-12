@@ -9,6 +9,6 @@ repository = "https://gitlab.com/huia-lang/stack-vm"
 readme = "README.md"
 
 [badges]
-gitlab = { respository = "huia-lang/stack-vm" }
+gitlab = { repository = "huia-lang/stack-vm" }
 
 [dependencies]
