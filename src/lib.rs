@@ -193,8 +193,6 @@
 //!
 //! You can find an example of function calling in this package's acceptance
 //! tests.
-extern crate rug;
-
 mod builder;
 mod instruction;
 mod immutable_table;
