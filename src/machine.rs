@@ -165,7 +165,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use mutable_table::MutableTable;
+    use write_many_table::WriteManyTable;
     use instruction::Instruction;
     use instruction_table::InstructionTable;
 
@@ -191,7 +191,7 @@ mod test {
     fn new() {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
-        let constants: MutableTable<usize> = MutableTable::new();
+        let constants: WriteManyTable<usize> = WriteManyTable::new();
         let machine = Machine::new(builder, &constants);
         assert_eq!(machine.ip, 0);
         assert!(!machine.call_stack.is_empty());
@@ -205,7 +205,7 @@ mod test {
         builder.push(1, vec![2]);
         builder.push(1, vec![3]);
         builder.push(2, vec![]);
-        let constants: MutableTable<usize> = MutableTable::new();
+        let constants: WriteManyTable<usize> = WriteManyTable::new();
         let machine = Machine::new(builder, &constants);
         let mut machine = Machine::run(machine);
         let result = machine.operand_stack.pop();
@@ -216,7 +216,7 @@ mod test {
     fn get_local() {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
-        let constants: MutableTable<usize> = MutableTable::new();
+        let constants: WriteManyTable<usize> = WriteManyTable::new();
         let mut machine = Machine::new(builder, &constants);
         assert!(machine.get_local("example").is_none());
         machine.set_local("example", 13);
@@ -229,7 +229,7 @@ mod test {
         let mut builder: Builder<usize> = Builder::new(&it);
         builder.label("next");
 
-        let constants: MutableTable<usize> = MutableTable::new();
+        let constants: WriteManyTable<usize> = WriteManyTable::new();
         let mut machine = Machine::new(builder, &constants);
         machine.set_local("outer", 13);
         assert_eq!(*machine.get_local_deep("outer").unwrap(), 13);
@@ -247,7 +247,7 @@ mod test {
     fn set_local() {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
-        let constants: MutableTable<usize> = MutableTable::new();
+        let constants: WriteManyTable<usize> = WriteManyTable::new();
         let mut machine = Machine::new(builder, &constants);
         assert!(machine.get_local("example").is_none());
         machine.set_local("example", 13);

@@ -7,8 +7,8 @@ use table::Table;
 /// Useful for your languages constants, etc.
 ///
 /// ```
-/// use stack_vm::{ImmutableTable, Table};
-/// let mut table: ImmutableTable<usize> = ImmutableTable::new();
+/// use stack_vm::{WriteOnceTable, Table};
+/// let mut table: WriteOnceTable<usize> = WriteOnceTable::new();
 /// assert!(table.is_empty());
 ///
 /// table.insert("example", 13);
@@ -21,18 +21,18 @@ use table::Table;
 /// ```
 ///
 /// ```should_panic
-/// use stack_vm::{ImmutableTable, Table};
-/// let mut table: ImmutableTable<usize> = ImmutableTable::new();
+/// use stack_vm::{WriteOnceTable, Table};
+/// let mut table: WriteOnceTable<usize> = WriteOnceTable::new();
 /// table.insert("example", 13);
 /// table.insert("example", 14);
 /// ```
 #[derive(Debug)]
-pub struct ImmutableTable<T>(HashMap<String, T>);
+pub struct WriteOnceTable<T>(HashMap<String, T>);
 
-impl<T> ImmutableTable<T> {
-    /// Return a new, empty `ImmutableTable`.
-    pub fn new() -> ImmutableTable<T> {
-        ImmutableTable(HashMap::new())
+impl<T> WriteOnceTable<T> {
+    /// Return a new, empty `WriteOnceTable`.
+    pub fn new() -> WriteOnceTable<T> {
+        WriteOnceTable(HashMap::new())
     }
 
     fn already_exists_guard(&self, name: &str) {
@@ -48,7 +48,7 @@ impl<T> ImmutableTable<T> {
     }
 }
 
-impl<T> Table for ImmutableTable<T> {
+impl<T> Table for WriteOnceTable<T> {
     type Item = T;
 
     fn insert(&mut self, name: &str, value: T) {
@@ -77,24 +77,24 @@ mod test {
 
     #[test]
     fn new() {
-        let immutable_table: ImmutableTable<usize> = ImmutableTable::new();
-        assert!(immutable_table.is_empty())
+        let write_once_table: WriteOnceTable<usize> = WriteOnceTable::new();
+        assert!(write_once_table.is_empty())
     }
 
     #[test]
     fn insert() {
-        let mut immutable_table: ImmutableTable<usize> = ImmutableTable::new();
-        immutable_table.insert("example", 13);
-        assert!(!immutable_table.is_empty());
-        assert_eq!(*immutable_table.get("example").unwrap(), 13);
+        let mut write_once_table: WriteOnceTable<usize> = WriteOnceTable::new();
+        write_once_table.insert("example", 13);
+        assert!(!write_once_table.is_empty());
+        assert_eq!(*write_once_table.get("example").unwrap(), 13);
     }
 
     #[test]
     #[should_panic(expected = "redefining constant")]
     fn insert_uniq() {
-        let mut immutable_table: ImmutableTable<usize> = ImmutableTable::new();
-        immutable_table.insert("example", 13);
-        assert_eq!(*immutable_table.get("example").unwrap(), 13);
-        immutable_table.insert("example", 13);
+        let mut write_once_table: WriteOnceTable<usize> = WriteOnceTable::new();
+        write_once_table.insert("example", 13);
+        assert_eq!(*write_once_table.get("example").unwrap(), 13);
+        write_once_table.insert("example", 13);
     }
 }

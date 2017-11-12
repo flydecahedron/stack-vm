@@ -7,8 +7,8 @@ use table::Table;
 /// Useful for your language's local variables, etc.
 ///
 /// ```
-/// use stack_vm::{MutableTable, Table};
-/// let mut table: MutableTable<usize> = MutableTable::new();
+/// use stack_vm::{WriteManyTable, Table};
+/// let mut table: WriteManyTable<usize> = WriteManyTable::new();
 /// assert!(table.is_empty());
 ///
 /// table.insert("example", 13);
@@ -26,16 +26,16 @@ use table::Table;
 /// assert_eq!(value, 14);
 /// ```
 #[derive(Debug)]
-pub struct MutableTable<T>(HashMap<String, T>);
+pub struct WriteManyTable<T>(HashMap<String, T>);
 
-impl<T> MutableTable<T> {
-    /// Return a new, empty `MutableTable`.
-    pub fn new() ->MutableTable<T> {
-        MutableTable(HashMap::new())
+impl<T> WriteManyTable<T> {
+    /// Return a new, empty `WriteManyTable`.
+    pub fn new() ->WriteManyTable<T> {
+        WriteManyTable(HashMap::new())
     }
 }
 
-impl<T> Table for MutableTable<T> {
+impl<T> Table for WriteManyTable<T> {
     type Item = T;
 
     fn insert(&mut self, name: &str, value: T) {
@@ -62,24 +62,24 @@ mod test {
 
     #[test]
     fn new() {
-        let mutable_table: MutableTable<usize> = MutableTable::new();
-        assert!(mutable_table.is_empty())
+        let write_many_table: WriteManyTable<usize> = WriteManyTable::new();
+        assert!(write_many_table.is_empty())
     }
 
     #[test]
     fn insert() {
-        let mut mutable_table: MutableTable<usize> = MutableTable::new();
-        mutable_table.insert("example", 13);
-        assert!(!mutable_table.is_empty());
-        assert_eq!(*mutable_table.get("example").unwrap(), 13);
+        let mut write_many_table: WriteManyTable<usize> = WriteManyTable::new();
+        write_many_table.insert("example", 13);
+        assert!(!write_many_table.is_empty());
+        assert_eq!(*write_many_table.get("example").unwrap(), 13);
     }
 
     #[test]
     fn insert_is_mutable() {
-        let mut mutable_table:MutableTable<usize> = MutableTable::new();
-        mutable_table.insert("example", 13);
-        assert_eq!(*mutable_table.get("example").unwrap(), 13);
-        mutable_table.insert("example", 14);
-        assert_eq!(*mutable_table.get("example").unwrap(), 14);
+        let mut write_many_table:WriteManyTable<usize> = WriteManyTable::new();
+        write_many_table.insert("example", 13);
+        assert_eq!(*write_many_table.get("example").unwrap(), 13);
+        write_many_table.insert("example", 14);
+        assert_eq!(*write_many_table.get("example").unwrap(), 14);
     }
 }

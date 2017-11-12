@@ -151,7 +151,7 @@
 //! together with the `stack_vm::Machine` to execute it.
 //!
 //! ```
-//! use stack_vm::{Instruction, InstructionTable, Machine, Builder, MutableTable};
+//! use stack_vm::{Instruction, InstructionTable, Machine, Builder, WriteManyTable};
 //! type Operand = i64;
 //!
 //! fn push(machine: &mut Machine<Operand>, args: &[usize]) {
@@ -174,7 +174,7 @@
 //! builder.push(0, vec![4 as Operand]);
 //! builder.push(1, vec![]);
 //!
-//! let constants: MutableTable<Operand> = MutableTable::new();
+//! let constants: WriteManyTable<Operand> = WriteManyTable::new();
 //! let machine = Machine::new(builder, &constants);
 //! let mut machine = Machine::run(machine);
 //! assert_eq!(machine.operand_pop(), 7);
@@ -195,8 +195,8 @@
 //! tests.
 mod builder;
 mod instruction;
-mod immutable_table;
-mod mutable_table;
+mod write_once_table;
+mod write_many_table;
 mod table;
 mod frame;
 mod stack;
@@ -205,8 +205,8 @@ mod instruction_table;
 
 pub use builder::Builder;
 pub use instruction::{Instruction, InstructionFn};
-pub use immutable_table::ImmutableTable;
-pub use mutable_table::MutableTable;
+pub use write_once_table::WriteOnceTable;
+pub use write_many_table::WriteManyTable;
 pub use table::Table;
 pub use frame::Frame;
 pub use stack::Stack;
