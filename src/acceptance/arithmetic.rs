@@ -63,7 +63,7 @@ fn addition_example() {
     builder.push(1, vec![]);
     builder.push(0, vec![4.0]);
     builder.push(1, vec![]);
-    let constants: MutableTable<f64> = MutableTable::new();
+    let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
@@ -79,7 +79,7 @@ fn subtraction_example() {
     builder.push(1, vec![]);
     builder.push(0, vec![2.0]);
     builder.push(2, vec![]);
-    let constants: MutableTable<f64> = MutableTable::new();
+    let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
@@ -93,7 +93,7 @@ fn division_example() {
     builder.push(0, vec![3.0]);
     builder.push(0, vec![4.0]);
     builder.push(3, vec![]);
-    let constants: MutableTable<f64> = MutableTable::new();
+    let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
@@ -107,7 +107,7 @@ fn multiplication_example() {
     builder.push(0, vec![3.0]);
     builder.push(0, vec![4.0]);
     builder.push(4, vec![]);
-    let constants: MutableTable<f64> = MutableTable::new();
+    let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();

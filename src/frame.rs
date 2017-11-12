@@ -2,18 +2,18 @@
 //!
 //! Used internally by the `Machine` to keep track of call scope.
 
-use mutable_table::MutableTable;
+use write_many_table::WriteManyTable;
 use table::Table;
 
 /// A call frame.
 ///
 /// Contains:
-/// * A `MutableTable` for storage of local variables.
+/// * A `WriteManyTable` for storage of local variables.
 /// * A return address - the instruction pointer for the machine to return to
 ///   when returning from this call.
 #[derive(Debug)]
 pub struct Frame<T> {
-    locals: MutableTable<T>,
+    locals: WriteManyTable<T>,
     pub return_address: usize
 }
 
@@ -21,7 +21,7 @@ impl<T> Frame<T> {
     /// Creates a new call frame with the specified return address.
     pub fn new(return_address: usize) -> Frame<T> {
         Frame {
-            locals: MutableTable::new(),
+            locals: WriteManyTable::new(),
             return_address: return_address
         }
     }

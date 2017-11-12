@@ -90,7 +90,7 @@ fn example() {
     builder.label("add_fun");
     builder.push(1, vec![]);
     builder.push(3, vec![]);
-    let constants: MutableTable<Operand> = MutableTable::new();
+    let constants: WriteManyTable<Operand> = WriteManyTable::new();
     let machine: Machine<Operand> = Machine::new(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop().to_i().unwrap();

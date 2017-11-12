@@ -144,7 +144,7 @@ Once you have the instructions and code generated then you can put them
 together with the `stack_vm::Machine` to execute it.
 
 ```rust
-use stack_vm::{Instruction, InstructionTable, Machine, Builder, MutableTable};
+use stack_vm::{Instruction, InstructionTable, Machine, Builder, WriteManyTable};
 type Operand = i64;
 
 fn push(machine: &mut Machine<Operand>, args: &[usize]) {
@@ -167,7 +167,7 @@ builder.push(0, vec![3 as Operand]);
 builder.push(0, vec![4 as Operand]);
 builder.push(1, vec![]);
 
-let constants: MutableTable<Operand> = MutableTable::new();
+let constants: WriteManyTable<Operand> = WriteManyTable::new();
 let machine = Machine::new(builder, &constants);
 let mut machine = Machine::run(machine);
 assert_eq!(machine.operand_pop(), 7);

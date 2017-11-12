@@ -21,7 +21,7 @@
 
 use std::fmt;
 use instruction_table::InstructionTable;
-use immutable_table::ImmutableTable;
+use write_once_table::WriteOnceTable;
 use table::Table;
 
 /// The builder struct.
@@ -34,14 +34,14 @@ use table::Table;
 pub struct Builder<'a, T: 'a + fmt::Debug> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions:      Vec<usize>,
-    pub labels:            ImmutableTable<usize>,
+    pub labels:            WriteOnceTable<usize>,
     pub data:              Vec<T>,
 }
 
 impl<'a, T: fmt::Debug>  Builder<'a, T> {
     /// Create a new `Builder` from an `InstructionTable`.
     pub fn new(instruction_table: &'a InstructionTable<T>) -> Builder<T> {
-        let mut labels = ImmutableTable::new();
+        let mut labels = WriteOnceTable::new();
         labels.insert("main", 0);
         Builder {
             instruction_table: &instruction_table,
