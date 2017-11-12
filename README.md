@@ -20,7 +20,7 @@ This crate is licensed under the terms of the MIT license.  See the `LICENSE` fi
 
 ## Computer Architecture
 
-The architecutre of a computer system is how the various logic components
+The architecture of a computer system is how the various logic components
 are connected together in order to execute the instructions and produce
 side-effects (useful outcomes).
 
@@ -178,7 +178,7 @@ assert_eq!(machine.operand_pop(), 7);
 Functions are executed by having the machine jump to another label within
 the code and continue executing from there.
 
-Every time the machine jumps it's creates a new call frame, which allows it
+Every time the machine jumps it creates a new call frame, which allows it
 to store and retrieve local variables without clobbering their parent
 call context.  It also contains the return address, meaning that when you
 ask the machine to return it will know which address in the code to go back
