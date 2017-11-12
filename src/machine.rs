@@ -95,7 +95,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// top and moving down until it locates the local variable in question
     /// or runs out of stack frames.
     pub fn get_local_deep(&self, name: &str) -> Option<&T> {
-        for frame in self.call_stack.as_slice() {
+        for frame in self.call_stack.as_slice().iter().rev() {
             let local = frame.get_local(name);
             if local.is_some() { return local; }
         }
@@ -223,6 +223,7 @@ mod test {
         assert!(machine.get_local("example").is_some());
     }
 
+    #[test]
     fn get_local_deep() {
         let it = instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
