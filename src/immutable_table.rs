@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use table::Table;
 
+#[derive(Debug)]
 pub struct ImmutableTable<T>(HashMap<String, T>);
 
 impl<T> ImmutableTable<T> {

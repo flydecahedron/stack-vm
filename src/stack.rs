@@ -1,6 +1,9 @@
+use std::fmt;
+
+#[derive(Debug)]
 pub struct Stack<T>(Vec<T>);
 
-impl<T> Stack<T> {
+impl<T: fmt::Debug> Stack<T> {
     pub fn new() -> Stack<T> {
         Stack(vec![])
     }

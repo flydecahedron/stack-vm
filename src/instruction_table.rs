@@ -2,9 +2,10 @@ use instruction::Instruction;
 use std::collections::HashMap;
 use std::fmt;
 
-pub struct InstructionTable<T: fmt::Display>(HashMap<usize, Instruction<T>>);
+#[derive(Debug)]
+pub struct InstructionTable<T: fmt::Display + fmt::Debug>(HashMap<usize, Instruction<T>>);
 
-impl<T: fmt::Display> InstructionTable<T> {
+impl<T: fmt::Display + fmt::Debug> InstructionTable<T> {
     pub fn new() -> InstructionTable<T> {
         InstructionTable(HashMap::new())
     }

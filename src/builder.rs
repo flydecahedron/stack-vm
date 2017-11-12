@@ -3,14 +3,15 @@ use instruction_table::InstructionTable;
 use immutable_table::ImmutableTable;
 use table::Table;
 
-pub struct Builder<'a, T: fmt::Display + 'a> {
+#[derive(Debug)]
+pub struct Builder<'a, T: 'a + fmt::Display + fmt::Debug> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions:      Vec<usize>,
     pub labels:            ImmutableTable<usize>,
     pub data:              Vec<T>,
 }
 
-impl<'a, T: fmt::Display> Builder<'a, T> {
+impl<'a, T: fmt::Display + fmt::Debug>  Builder<'a, T> {
     pub fn new(instruction_table: &'a InstructionTable<T>) -> Builder<T> {
         Builder {
             instruction_table: &instruction_table,
@@ -47,7 +48,7 @@ impl<'a, T: fmt::Display> Builder<'a, T> {
     }
 }
 
-impl<'a, T: fmt::Display> fmt::Display for Builder<'a, T> {
+impl<'a, T: fmt::Display + fmt::Debug> fmt::Display for Builder<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut result = String::new();
 
