@@ -89,6 +89,19 @@ impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
             .get_local(name)
     }
 
+    /// Look for a local variable in all call frames.
+    ///
+    /// The machine will look in each frame in the call stack starting at the
+    /// top and moving down until it locates the local variable in question
+    /// or runs out of stack frames.
+    pub fn get_local_deep(&self, name: &str) -> Option<&T> {
+        for frame in self.call_stack.as_slice() {
+            let local = frame.get_local(name);
+            if local.is_some() { return local; }
+        }
+        None
+    }
+
     /// Set a local variable in the current call frame.
     ///
     /// Places a value in the frame's local variable table.
@@ -204,8 +217,29 @@ mod test {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
         let constants: MutableTable<usize> = MutableTable::new();
-        let machine = Machine::new(builder, &constants);
+        let mut machine = Machine::new(builder, &constants);
         assert!(machine.get_local("example").is_none());
+        machine.set_local("example", 13);
+        assert!(machine.get_local("example").is_some());
+    }
+
+    fn get_local_deep() {
+        let it = instruction_table();
+        let mut builder: Builder<usize> = Builder::new(&it);
+        builder.label("next");
+
+        let constants: MutableTable<usize> = MutableTable::new();
+        let mut machine = Machine::new(builder, &constants);
+        machine.set_local("outer", 13);
+        assert_eq!(*machine.get_local_deep("outer").unwrap(), 13);
+        machine.jump("next");
+        machine.set_local("outer", 14);
+        machine.set_local("inner", 15);
+        assert_eq!(*machine.get_local_deep("outer").unwrap(), 14);
+        assert_eq!(*machine.get_local_deep("inner").unwrap(), 15);
+        machine.ret();
+        assert_eq!(*machine.get_local_deep("outer").unwrap(), 13);
+        assert!(machine.get_local_deep("inner").is_none());
     }
 
     #[test]

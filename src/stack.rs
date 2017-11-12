@@ -56,6 +56,10 @@ impl<T: fmt::Debug> Stack<T> {
         if len == 0 { panic!("Cannot peek into empty stack!") }
         &mut self.0[len - 1]
     }
+
+    pub fn as_slice(&self) -> &[T] {
+        self.0.as_slice()
+    }
 }
 
 #[cfg(test)]
