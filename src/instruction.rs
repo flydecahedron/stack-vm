@@ -74,7 +74,7 @@ pub struct Instruction<T: fmt::Display + fmt::Debug> {
     pub op_code: usize,
     pub name:    String,
     pub arity:   usize,
-    pub fun:     INSTRUCTION<T>
+    pub fun:     InstructionFn<T>
 }
 
 /// The instruction function signature.
@@ -87,7 +87,7 @@ pub struct Instruction<T: fmt::Display + fmt::Debug> {
 ///
 /// The `args` array contains indexes into the `Builder`'s data section. It's
 /// up to your instruction to retrieve said data.
-type INSTRUCTION<T> = fn(machine: &mut Machine<T>, args: &[usize]);
+pub type InstructionFn<T> = fn(machine: &mut Machine<T>, args: &[usize]);
 
 impl<T: fmt::Display + fmt::Debug> fmt::Debug for Instruction<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -97,7 +97,7 @@ impl<T: fmt::Display + fmt::Debug> fmt::Debug for Instruction<T> {
 
 impl<T: fmt::Display + fmt::Debug> Instruction<T> {
     /// Create a new instruction.
-    pub fn new(op_code: usize, name: &str, arity: usize, fun: INSTRUCTION<T>) -> Instruction<T> {
+    pub fn new(op_code: usize, name: &str, arity: usize, fun: InstructionFn<T>) -> Instruction<T> {
         Instruction {
             op_code: op_code,
             name: String::from(name),
