@@ -32,20 +32,22 @@ use table::Table;
 /// * a `Table` of labels used for jumping.
 /// * a list of `T` to be stored in the builder's data section.
 #[derive(Debug)]
-pub struct Builder<'a, T: 'a + fmt::Display + fmt::Debug> {
+pub struct Builder<'a, T: 'a + fmt::Debug> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions:      Vec<usize>,
     pub labels:            ImmutableTable<usize>,
     pub data:              Vec<T>,
 }
 
-impl<'a, T: fmt::Display + fmt::Debug>  Builder<'a, T> {
+impl<'a, T: fmt::Debug>  Builder<'a, T> {
     /// Create a new `Builder` from an `InstructionTable`.
     pub fn new(instruction_table: &'a InstructionTable<T>) -> Builder<T> {
+        let mut labels = ImmutableTable::new();
+        labels.insert("main", 0);
         Builder {
             instruction_table: &instruction_table,
             instructions:      vec![],
-            labels:            ImmutableTable::new(),
+            labels:            labels,
             data:              vec![],
         }
     }
@@ -90,44 +92,44 @@ impl<'a, T: fmt::Display + fmt::Debug>  Builder<'a, T> {
     }
 }
 
-impl<'a, T: fmt::Display + fmt::Debug> fmt::Display for Builder<'a, T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut result = String::new();
+// impl<'a, T: fmt::Debug> fmt::Display for Builder<'a, T> {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         let mut result = String::new();
 
-        for i in 0..self.data.len() {
-            result.push_str(&format!("@{} = {}\n", i, self.data[i]));
-        }
+//         for i in 0..self.data.len() {
+//             result.push_str(&format!("@{} = {}\n", i, self.data[i]));
+//         }
 
-        if self.data.len() > 0 {
-            result.push_str("\n");
-        }
+//         if self.data.len() > 0 {
+//             result.push_str("\n");
+//         }
 
-        let mut i = 0;
-        let len = self.instructions.len();
-        loop {
-            if i == len { break; }
+//         let mut i = 0;
+//         let len = self.instructions.len();
+//         loop {
+//             if i == len { break; }
 
-            let op_code = self.instructions[i];
+//             let op_code = self.instructions[i];
 
-            let instr = self
-                .instruction_table
-                .by_op_code(op_code)
-                .expect(&format!("Unable to find instruction with op code {}", op_code));
-            result.push_str(&instr.name);
+//             let instr = self
+//                 .instruction_table
+//                 .by_op_code(op_code)
+//                 .expect(&format!("Unable to find instruction with op code {}", op_code));
+//             result.push_str(&instr.name);
 
-            for _j in 0..instr.arity {
-                i = i + 1;
-                let const_idx = self.instructions[i];
-                result.push_str(&format!(" @{}", const_idx));
-            }
-            result.push_str("\n");
+//             for _j in 0..instr.arity {
+//                 i = i + 1;
+//                 let const_idx = self.instructions[i];
+//                 result.push_str(&format!(" @{}", const_idx));
+//             }
+//             result.push_str("\n");
 
-            i = i + 1;
-        }
+//             i = i + 1;
+//         }
 
-        write!(f, "{}", result)
-    }
-}
+//         write!(f, "{}", result)
+//     }
+// }
 
 #[cfg(test)]
 mod test {
@@ -178,23 +180,23 @@ mod test {
         assert_eq!(*builder.labels.get("wow").unwrap(), 1);
     }
 
-    #[test]
-    fn builder_string_format() {
-        let it = example_instruction_table();
-        let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(0, vec![]);
-        builder.push(1, vec![123]);
-        builder.push(1, vec![456]);
-        builder.push(2, vec![]);
-        let actual = format!("{}", builder);
-        let expected = "@0 = 123
-@1 = 456
+//     #[test]
+//     fn builder_string_format() {
+//         let it = example_instruction_table();
+//         let mut builder: Builder<usize> = Builder::new(&it);
+//         builder.push(0, vec![]);
+//         builder.push(1, vec![123]);
+//         builder.push(1, vec![456]);
+//         builder.push(2, vec![]);
+//         let actual = format!("{}", builder);
+//         let expected = "@0 = 123
+// @1 = 456
 
-noop
-push @0
-push @1
-pop
-";
-        assert_eq!(actual, expected);
-    }
+// noop
+// push @0
+// push @1
+// pop
+// ";
+//         assert_eq!(actual, expected);
+//     }
 }

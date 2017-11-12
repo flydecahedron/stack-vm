@@ -11,7 +11,6 @@
 //! label later on.
 
 use super::super::*;
-use std::fmt;
 
 /// Our operand type.  An enum to contain multiple types.
 #[derive(Clone, Debug)]
@@ -32,15 +31,6 @@ impl Operand {
         match self {
             &Operand::S(ref s) => Some(s),
             _ => None
-        }
-    }
-}
-
-impl fmt::Display for Operand {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &Operand::I(i) => write!(f, "{}", i),
-            &Operand::S(ref s) => write!(f, "{:?}", s)
         }
     }
 }

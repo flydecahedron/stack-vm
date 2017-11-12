@@ -11,9 +11,9 @@ use std::fmt;
 ///
 /// Implemented as a `HashMap` behind the scenes.
 #[derive(Debug)]
-pub struct InstructionTable<T: fmt::Display + fmt::Debug>(HashMap<usize, Instruction<T>>);
+pub struct InstructionTable<T: fmt::Debug>(HashMap<usize, Instruction<T>>);
 
-impl<T: fmt::Display + fmt::Debug> InstructionTable<T> {
+impl<T: fmt::Debug> InstructionTable<T> {
     /// Create a new empty instruction table.
     pub fn new() -> InstructionTable<T> {
         InstructionTable(HashMap::new())
