@@ -1,6 +1,6 @@
 //! # stack-vm
 //!
-//! This crate implements a *generic* stack machine for which you provide the
+//! This crate implements a generic stack machine for which you provide the
 //! operands and the instructions and this crate provides the rest of the
 //! infrastructure required to run it.
 //!
