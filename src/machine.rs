@@ -16,7 +16,7 @@ use builder::Builder;
 /// * A `Table` of constants, which you can use in your instructions if needed.
 /// * A `Stack` of `Frame` used to keep track of calls being executed.
 /// * A `Stack` of `T` which is used as the main operand stack.
-pub struct Machine<'a, T: 'a + fmt::Display + fmt::Debug> {
+pub struct Machine<'a, T: 'a + fmt::Debug> {
     pub builder: Builder<'a, T>,
     pub ip: usize,
     pub constants: &'a Table<Item = T>,
@@ -24,7 +24,7 @@ pub struct Machine<'a, T: 'a + fmt::Display + fmt::Debug> {
     pub operand_stack: Stack<T>,
 }
 
-impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
+impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// Returns a new `Machine` ready to execute instructions.
     ///
     /// The machine is initialised by passing in your `Builder` which contains

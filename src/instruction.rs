@@ -31,7 +31,7 @@
 //! A `jump` instruction, which takes the name of a label from the builder's data
 //! and then jumps to it.
 //!
-//! Note that operand types have to implement `std::fmt::Debug` and `std::fmt::Display`.
+//! Note that operand types have to implement `std::fmt::Debug`.
 //!
 //! ```
 //! use std::fmt;
@@ -39,15 +39,6 @@
 //!
 //! #[derive(Debug)]
 //! enum Operand { I(i64), S(String) }
-//!
-//! impl fmt::Display for Operand {
-//!     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//!         match self {
-//!             &Operand::S(ref s) => write!(f, "{}", s),
-//!             &Operand::I(ref i) => write!(f, "{}", i)
-//!         }
-//!     }
-//! }
 //!
 //! fn jump(machine: &mut Machine<Operand>, args: &[usize]) {
 //!     let label = match machine.get_data(args[0]) {
@@ -70,7 +61,7 @@ use machine::Machine;
 /// * A name for serialisation and debugging reasons.
 /// * An arity - the number of arguments this instruction expects to receive.
 /// * A function which is used to execute the instruction.
-pub struct Instruction<T: fmt::Display + fmt::Debug> {
+pub struct Instruction<T: fmt::Debug> {
     pub op_code: usize,
     pub name:    String,
     pub arity:   usize,
@@ -89,13 +80,13 @@ pub struct Instruction<T: fmt::Display + fmt::Debug> {
 /// up to your instruction to retrieve said data.
 pub type InstructionFn<T> = fn(machine: &mut Machine<T>, args: &[usize]);
 
-impl<T: fmt::Display + fmt::Debug> fmt::Debug for Instruction<T> {
+impl<T: fmt::Debug> fmt::Debug for Instruction<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Instruction {{ op_code: {}, name: {}, arity: {} }}", self.op_code, self.name, self.arity)
     }
 }
 
-impl<T: fmt::Display + fmt::Debug> Instruction<T> {
+impl<T: fmt::Debug> Instruction<T> {
     /// Create a new instruction.
     pub fn new(op_code: usize, name: &str, arity: usize, fun: InstructionFn<T>) -> Instruction<T> {
         Instruction {
