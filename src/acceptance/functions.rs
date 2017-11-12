@@ -1,7 +1,7 @@
 use super::super::*;
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Operand {
     I(i64),
     S(String)
@@ -44,9 +44,8 @@ fn add(machine: &mut Machine<Operand>, _args: &[usize]) {
 }
 
 fn call(machine: &mut Machine<Operand>, args: &[usize]) {
-    let label = machine.get_data(args[0]).to_s().unwrap();
-    // let label = machine.builder.data[args[0]].to_s().unwrap();
-    machine.jump(label);
+    let label = machine.get_data(args[0]).clone();
+    machine.jump(label.to_s().unwrap());
 }
 
 fn ret(machine: &mut Machine<Operand>, _args: &[usize]) {
@@ -77,6 +76,7 @@ fn example() {
     builder.push(0, vec![op_i(3)]);
     builder.push(0, vec![op_i(4)]);
     builder.push(2, vec![op_s("add_fun")]);
+    builder.push(3, vec![]);
     builder.label("add_fun");
     builder.push(1, vec![]);
     builder.push(3, vec![]);

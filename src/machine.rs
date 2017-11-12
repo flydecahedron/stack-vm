@@ -4,7 +4,7 @@ use frame::Frame;
 use table::Table;
 use builder::Builder;
 
-pub struct Machine<'a, T: 'a + fmt::Display> {
+pub struct Machine<'a, T: 'a + fmt::Display + fmt::Debug> {
     pub builder: Builder<'a, T>,
     pub ip: usize,
     pub constants: &'a Table<Item = T>,
@@ -12,9 +12,9 @@ pub struct Machine<'a, T: 'a + fmt::Display> {
     pub operand_stack: Stack<T>,
 }
 
-impl<'a, T: 'a + fmt::Display> Machine<'a, T> {
+impl<'a, T: 'a + fmt::Display + fmt::Debug> Machine<'a, T> {
     pub fn new(builder: Builder<'a, T>, constants: &'a Table<Item = T>) -> Machine<'a, T> {
-        let frame: Frame<T> = Frame::new(0);
+        let frame: Frame<T> = Frame::new(builder.instructions.len());
         let mut call_stack = Stack::new();
         call_stack.push(frame);
 
@@ -37,6 +37,7 @@ impl<'a, T: 'a + fmt::Display> Machine<'a, T> {
                 .instruction_table
                 .by_op_code(op_code)
                 .expect(&format!("Unable to find instruction with op code {}", op_code));
+
 
             machine.ip = machine.ip + 1;
             let mut args: Vec<usize> = vec![];

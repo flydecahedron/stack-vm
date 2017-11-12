@@ -1,6 +1,7 @@
 use mutable_table::MutableTable;
 use table::Table;
 
+#[derive(Debug)]
 pub struct Frame<T> {
     locals: MutableTable<T>,
     pub return_address: usize
