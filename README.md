@@ -168,7 +168,7 @@ builder.push(0, vec![4 as Operand]);
 builder.push(1, vec![]);
 
 let constants: WriteManyTable<Operand> = WriteManyTable::new();
-let machine = Machine::new(builder, &constants);
+let machine = Machine::from_builder(builder, &constants);
 let mut machine = Machine::run(machine);
 assert_eq!(machine.operand_pop(), 7);
 ```

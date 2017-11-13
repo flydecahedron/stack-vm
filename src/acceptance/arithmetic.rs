@@ -7,8 +7,8 @@ use super::super::*;
 
 /// Pushes an piece of data from the data section onto the operand stack.
 fn push(machine: &mut Machine<f64>, args: &[usize]) {
-    let arg = machine.builder.data[args[0]];
-    machine.operand_push(arg)
+    let arg = *machine.get_data(args[0]);
+    machine.operand_push(arg);
 }
 
 /// Pops two operands off the top of the stack, adds them together and
@@ -64,7 +64,7 @@ fn addition_example() {
     builder.push(0, vec![4.0]);
     builder.push(1, vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::new(builder, &constants);
+    let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 9.0);
@@ -80,7 +80,7 @@ fn subtraction_example() {
     builder.push(0, vec![2.0]);
     builder.push(2, vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::new(builder, &constants);
+    let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 5.0);
@@ -94,7 +94,7 @@ fn division_example() {
     builder.push(0, vec![4.0]);
     builder.push(3, vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::new(builder, &constants);
+    let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 0.75);
@@ -108,7 +108,7 @@ fn multiplication_example() {
     builder.push(0, vec![4.0]);
     builder.push(4, vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::new(builder, &constants);
+    let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 12.0);

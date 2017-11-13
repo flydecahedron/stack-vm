@@ -7,6 +7,8 @@ use stack::Stack;
 use frame::Frame;
 use table::Table;
 use builder::Builder;
+use code::Code;
+use instruction_table::InstructionTable;
 
 /// `Machine` contains all the information needed to run your program.
 ///
@@ -17,7 +19,8 @@ use builder::Builder;
 /// * A `Stack` of `Frame` used to keep track of calls being executed.
 /// * A `Stack` of `T` which is used as the main operand stack.
 pub struct Machine<'a, T: 'a + fmt::Debug> {
-    pub builder: Builder<'a, T>,
+    pub code: Code<T>,
+    pub instruction_table: &'a InstructionTable<T>,
     pub ip: usize,
     pub constants: &'a Table<Item = T>,
     pub call_stack: Stack<Frame<T>>,
@@ -29,17 +32,24 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     ///
     /// The machine is initialised by passing in your `Builder` which contains
     /// all the code and data of your program, and a `Table` of constants.
-    pub fn new(builder: Builder<'a, T>, constants: &'a Table<Item = T>) -> Machine<'a, T> {
-        let frame: Frame<T> = Frame::new(builder.instructions.len());
+    pub fn from_builder(builder: Builder<'a, T>, constants: &'a Table<Item = T>) -> Machine<'a, T> {
+        let instruction_table = builder.instruction_table.clone();
+        let code = Code::from_builder(builder);
+        Machine::from_code(code, constants, instruction_table)
+    }
+
+    pub fn from_code(code: Code<T>, constants: &'a Table<Item = T>, instruction_table: &'a InstructionTable<T>) -> Machine<'a, T> {
+        let frame: Frame<T> = Frame::new(code.code.len());
         let mut call_stack = Stack::new();
         call_stack.push(frame);
 
-        Machine{
-            builder:       builder,
-            ip:            0,
-            constants:     constants,
-            call_stack:    call_stack,
-            operand_stack: Stack::new()
+        Machine {
+            code:              code,
+            instruction_table: instruction_table,
+            ip:                0,
+            constants:         constants,
+            call_stack:        call_stack,
+            operand_stack:     Stack::new()
         }
     }
 
@@ -55,15 +65,13 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// last frame is removed from the call stack.
     pub fn run(mut machine: Machine<'a, T>) -> Machine<'a, T> {
         loop {
-            if machine.ip == machine.builder.len() { break; }
+            if machine.ip == machine.code.code.len() { break; }
 
-            let op_code = machine.builder.instructions[machine.ip];
-            machine.ip = machine.ip + 1;
-            let arity   = machine.builder.instructions[machine.ip];
-            machine.ip = machine.ip + 1;
+            let op_code = machine.code.code[machine.ip];
+            let arity   = machine.code.code[machine.ip + 1];
+            machine.ip  = machine.ip + 2;
 
             let instr = machine
-                .builder
                 .instruction_table
                 .by_op_code(op_code)
                 .expect(&format!("Unable to find instruction with op code {}", op_code));
@@ -71,7 +79,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
             let mut args: Vec<usize> = vec![];
 
             for _i in 0..arity {
-                args.push(machine.builder.instructions[machine.ip]);
+                args.push(machine.code.code[machine.ip]);
                 machine.ip = machine.ip + 1;
             }
 
@@ -127,7 +135,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
 
     /// Retrieve a reference to a `T` stored in the builder's data section.
     pub fn get_data(&self, idx: usize) -> &T {
-        self.builder
+        self.code
             .data
             .get(idx)
             .expect(&format!("Constant data is not present at index {}.", idx))
@@ -143,13 +151,12 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     ///
     /// This method specifically does not transfer operands to call arguments.
     pub fn jump(&mut self, label: &str) {
-        let new_ip = self.builder
-            .labels
-            .get(label)
+        let new_ip = self.code
+            .get_label_ip(label)
             .expect(&format!("Attempt to jump to unknown label {}", label));
         let old_ip = self.ip;
         self.call_stack.push(Frame::new(old_ip));
-        self.ip = *new_ip;
+        self.ip = new_ip;
     }
 
     /// Performs a return.
@@ -172,7 +179,7 @@ mod test {
     use instruction_table::InstructionTable;
 
     fn push(machine: &mut Machine<usize>, args: &[usize]) {
-        let arg = machine.builder.data.get(args[0]).unwrap();
+        let arg = machine.code.data.get(args[0]).unwrap();
         machine.operand_stack.push(*arg);
     }
 
@@ -194,7 +201,7 @@ mod test {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let machine = Machine::new(builder, &constants);
+        let machine = Machine::from_builder(builder, &constants);
         assert_eq!(machine.ip, 0);
         assert!(!machine.call_stack.is_empty());
         assert!(machine.operand_stack.is_empty());
@@ -208,7 +215,7 @@ mod test {
         builder.push(1, vec![3]);
         builder.push(2, vec![]);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let machine = Machine::new(builder, &constants);
+        let machine = Machine::from_builder(builder, &constants);
         let mut machine = Machine::run(machine);
         let result = machine.operand_stack.pop();
         assert_eq!(result, 5);
@@ -219,7 +226,7 @@ mod test {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let mut machine = Machine::new(builder, &constants);
+        let mut machine = Machine::from_builder(builder, &constants);
         assert!(machine.get_local("example").is_none());
         machine.set_local("example", 13);
         assert!(machine.get_local("example").is_some());
@@ -232,7 +239,7 @@ mod test {
         builder.label("next");
 
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let mut machine = Machine::new(builder, &constants);
+        let mut machine = Machine::from_builder(builder, &constants);
         machine.set_local("outer", 13);
         assert_eq!(*machine.get_local_deep("outer").unwrap(), 13);
         machine.jump("next");
@@ -250,7 +257,7 @@ mod test {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let mut machine = Machine::new(builder, &constants);
+        let mut machine = Machine::from_builder(builder, &constants);
         assert!(machine.get_local("example").is_none());
         machine.set_local("example", 13);
         assert_eq!(*machine.get_local("example").unwrap(), 13);

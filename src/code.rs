@@ -43,6 +43,13 @@ impl<T: fmt::Debug> Code<T> {
     pub fn labels(&self) -> &[(usize, String)] {
         self.labels.as_slice()
     }
+
+    pub fn get_label_ip(&self, name: &str) -> Option<usize> {
+        for label in self.labels.as_slice() {
+            if label.1 == name { return Some(label.0); }
+        }
+        None
+    }
 }
 
 impl<T: fmt::Debug> fmt::Debug for Code<T> {
@@ -126,6 +133,14 @@ mod test {
         assert_eq!(code.data(), [13, 14]);
         assert_eq!(code.labels().len(), 1);
         assert_eq!(code.labels()[0], (0 as usize, "main".to_string()));
+    }
+
+    #[test]
+    fn get_label_ip() {
+        let it = example_instruction_table();
+        let builder: Builder<usize> = Builder::new(&it);
+        let code: Code<usize> = Code::from_builder(builder);
+        assert_eq!(code.get_label_ip("main").unwrap(), 0);
     }
 
     #[test]
