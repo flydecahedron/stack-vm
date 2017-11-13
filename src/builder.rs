@@ -68,6 +68,7 @@ impl<'a, T: fmt::Debug>  Builder<'a, T> {
         }
 
         self.instructions.push(instr.op_code);
+        self.instructions.push(instr.arity);
         for arg in args {
             self.data.push(arg);
             self.instructions.push(self.data.len() - 1);
@@ -112,6 +113,8 @@ impl<'a, T: 'a + fmt::Debug> fmt::Debug for Builder<'a, T> {
             }
 
             let op_code = self.instructions[ip];
+            ip = ip + 1;
+            let arity   = self.instructions[ip];
 
             let instr = self
                 .instruction_table
@@ -120,7 +123,7 @@ impl<'a, T: 'a + fmt::Debug> fmt::Debug for Builder<'a, T> {
 
             result.push_str(&format!("\t{}", &instr.name));
 
-            for _j in 0..instr.arity {
+            for _j in 0..arity {
                 ip = ip + 1;
                 let const_idx = self.instructions[ip];
                 result.push_str(&format!(" @{}", const_idx));
@@ -180,7 +183,7 @@ mod test {
         let mut builder: Builder<usize> = Builder::new(&it);
         builder.push(0, vec![]);
         builder.label("wow");
-        assert_eq!(*builder.labels.get("wow").unwrap(), 1);
+        assert_eq!(*builder.labels.get("wow").unwrap(), 2);
     }
 
     #[test]

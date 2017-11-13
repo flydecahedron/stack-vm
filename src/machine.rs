@@ -58,17 +58,19 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
             if machine.ip == machine.builder.len() { break; }
 
             let op_code = machine.builder.instructions[machine.ip];
+            machine.ip = machine.ip + 1;
+            let arity   = machine.builder.instructions[machine.ip];
+            machine.ip = machine.ip + 1;
+
             let instr = machine
                 .builder
                 .instruction_table
                 .by_op_code(op_code)
                 .expect(&format!("Unable to find instruction with op code {}", op_code));
 
-
-            machine.ip = machine.ip + 1;
             let mut args: Vec<usize> = vec![];
 
-            for _i in 0..instr.arity {
+            for _i in 0..arity {
                 args.push(machine.builder.instructions[machine.ip]);
                 machine.ip = machine.ip + 1;
             }
