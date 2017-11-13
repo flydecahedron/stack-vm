@@ -2,6 +2,7 @@
 //!
 //! If you wish to dump compiled bytecode from your virtual machine for loading
 //! again later then you need to implement the `Serialize` trait.
+use std::io::Write;
 
 /// CodeSerialize
 ///
@@ -18,7 +19,7 @@
 /// for example as a single integer, or a map of keys and values.
 pub trait CodeSerialize {
     /// Serialize your Operand using `rmp`.
-    fn to_byte_code(&self, &mut Vec<u8>);
+    fn to_byte_code(&self, &mut Write);
 }
 
 #[cfg(test)]
@@ -29,7 +30,7 @@ mod test {
     struct Operand(i64);
 
     impl CodeSerialize for Operand {
-        fn to_byte_code(&self, mut buf: &mut Vec<u8>) {
+        fn to_byte_code(&self, mut buf: &mut Write) {
             rmp::encode::write_sint(&mut buf, self.0).unwrap();
         }
     }
