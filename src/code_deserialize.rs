@@ -12,8 +12,10 @@
 /// See the [`rmp` docs](https://docs.rs/rmp/0.8.7/rmp/) to find out which
 /// functions you can use to write out your types.
 
+use std::io::Read;
+
 pub trait CodeDeserialize {
-    fn from_byte_code(&mut &[u8]) -> Self;
+    fn from_byte_code(&mut Read) -> Self;
 }
 
 #[cfg(test)]
@@ -25,8 +27,8 @@ mod test {
     struct Operand(i64);
 
     impl CodeDeserialize for Operand {
-        fn from_byte_code(buf: &mut &[u8]) -> Operand {
-            let i = rmp::decode::read_int(&mut &buf[..]).unwrap();
+        fn from_byte_code(mut buf: &mut Read) -> Operand {
+            let i = rmp::decode::read_int(&mut buf).unwrap();
             Operand(i)
         }
     }
