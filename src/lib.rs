@@ -202,6 +202,7 @@ mod frame;
 mod stack;
 mod machine;
 mod instruction_table;
+mod code;
 
 pub use builder::Builder;
 pub use instruction::{Instruction, InstructionFn};

@@ -40,6 +40,18 @@ impl<T: fmt::Debug> InstructionTable<T> {
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
+
+    pub fn symbols(&self) -> Vec<(usize, String)> {
+        let mut result = vec![];
+        self.0.keys().for_each(|ref key| {
+            let instr = self.0.get(key).unwrap();
+            result.push((instr.op_code, instr.name.clone()));
+        });
+        result.sort_by(|lhs, rhs| {
+            lhs.0.cmp(&rhs.0)
+        });
+        result
+    }
 }
 
 #[cfg(test)]
