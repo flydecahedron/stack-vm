@@ -12,3 +12,4 @@ readme = "README.md"
 gitlab = { repository = "huia-lang/stack-vm" }
 
 [dependencies]
+rmp = "^0.8"

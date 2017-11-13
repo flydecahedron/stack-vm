@@ -193,6 +193,9 @@
 //!
 //! You can find an example of function calling in this package's acceptance
 //! tests.
+
+extern crate rmp;
+
 mod builder;
 mod instruction;
 mod write_once_table;
@@ -203,6 +206,8 @@ mod stack;
 mod machine;
 mod instruction_table;
 mod code;
+mod code_serialize;
+mod code_deserialize;
 
 pub use builder::Builder;
 pub use instruction::{Instruction, InstructionFn};
@@ -213,6 +218,9 @@ pub use frame::Frame;
 pub use stack::Stack;
 pub use machine::Machine;
 pub use instruction_table::InstructionTable;
+pub use code::Code;
+pub use code_serialize::CodeSerialize;
+pub use code_deserialize::CodeDeserialize;
 
 #[cfg(test)]
 mod acceptance;
