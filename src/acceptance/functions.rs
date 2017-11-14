@@ -83,13 +83,13 @@ fn op_s(s: &str) -> Operand {
 fn example() {
     let it = instruction_table();
     let mut builder: Builder<Operand> = Builder::new(&it);
-    builder.push(0, vec![op_i(3)]);
-    builder.push(0, vec![op_i(4)]);
-    builder.push(2, vec![op_s("add_fun")]);
-    builder.push(3, vec![]);
+    builder.push("push", vec![op_i(3)]);
+    builder.push("push", vec![op_i(4)]);
+    builder.push("call", vec![op_s("add_fun")]);
+    builder.push("ret",  vec![]);
     builder.label("add_fun");
-    builder.push(1, vec![]);
-    builder.push(3, vec![]);
+    builder.push("add",  vec![]);
+    builder.push("ret",  vec![]);
     let constants: WriteManyTable<Operand> = WriteManyTable::new();
     let machine: Machine<Operand> = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);

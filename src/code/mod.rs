@@ -18,13 +18,11 @@
 //!
 //! # fn main() {
 //! let mut instruction_table = InstructionTable::new();
-//! instruction_table.insert(Instruction::new(0, "noop", 0, example_noop));
 //! instruction_table.insert(Instruction::new(1, "push", 1, example_noop));
-//! instruction_table.insert(Instruction::new(2, "pop",  0, example_noop));
 //!
 //! let mut builder: Builder<Operand> = Builder::new(&instruction_table);
-//! builder.push(1, vec![Operand(13)]);
-//! builder.push(1, vec![Operand(14)]);
+//! builder.push("push", vec![Operand(13)]);
+//! builder.push("push", vec![Operand(14)]);
 //!
 //! Code::from_builder(builder);
 //! # }
@@ -221,8 +219,8 @@ mod test {
     fn from_builder() {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(1, vec![13]);
-        builder.push(1, vec![14]);
+        builder.push("push", vec![13]);
+        builder.push("push", vec![14]);
         let code: Code<usize> = Code::from_builder(builder);
 
         assert_eq!(code.symbols().len(), 3);
@@ -248,11 +246,11 @@ mod test {
     fn debug_formatter() {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(0, vec![]);
-        builder.push(1, vec![123]);
-        builder.push(1, vec![456]);
+        builder.push("noop", vec![]);
+        builder.push("push", vec![123]);
+        builder.push("push", vec![456]);
         builder.label("some_function");
-        builder.push(2, vec![]);
+        builder.push("pop",  vec![]);
         let code = Code::from_builder(builder);
 
         let actual = format!("{:?}", code);
@@ -274,11 +272,11 @@ mod test {
     fn to_byte_code() {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(0, vec![]);
-        builder.push(1, vec![123]);
-        builder.push(1, vec![456]);
+        builder.push("noop", vec![]);
+        builder.push("push", vec![123]);
+        builder.push("push", vec![456]);
         builder.label("some_function");
-        builder.push(2, vec![]);
+        builder.push("pop",  vec![]);
         let code = Code::from_builder(builder);
         let mut actual: Vec<u8> = vec![];
         code.to_byte_code(&mut actual);
