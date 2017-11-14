@@ -3,6 +3,10 @@
 /// # Table
 ///
 /// A simple trait used for accessing table-like objects.
+///
+/// This trait is used internally for the machine's constant table.  As long as
+/// your table type implements this trait then you'll be cool.  Meaning you can
+/// choose whatever language semantics you want with regards constants.
 pub trait Table {
     /// The type for items stored and retrieved from the table.
     type Item;

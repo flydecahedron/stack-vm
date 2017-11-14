@@ -12,7 +12,7 @@ use instruction_table::InstructionTable;
 
 /// `Machine` contains all the information needed to run your program.
 ///
-/// * A `Builder`, used describe the source instructions and data to execute.
+/// * A `Code`, used describe the source instructions and data to execute.
 /// * An instruction pointer, which points to the currently-executing
 ///   instruciton.
 /// * A `Table` of constants, which you can use in your instructions if needed.
@@ -133,7 +133,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
             .pop()
     }
 
-    /// Retrieve a reference to a `T` stored in the builder's data section.
+    /// Retrieve a reference to a `T` stored in the Code's data section.
     pub fn get_data(&self, idx: usize) -> &T {
         self.code
             .data
@@ -144,10 +144,11 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// Perform a jump to a named label.
     ///
     /// This method performs the following actions:
-    /// * Retrieve the instruction pointer for a given label from the builder.
+    /// * Retrieve the instruction pointer for a given label from the Code.
     /// * Create a new frame with it's return address set to the current
     ///   instruction pointer.
     /// * Push the new frame onto the call stack.
+    /// * Set the machine's instruction pointer to the new location.
     ///
     /// This method specifically does not transfer operands to call arguments.
     pub fn jump(&mut self, label: &str) {
@@ -165,6 +166,13 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// instruction pointer back to the frame's return address.
     /// It's up to you to push your return value onto the operand stack (if
     /// your language has such return semantics).
+    ///
+    /// The last call frame contains a return address at the end of the source
+    /// code, so the machine will stop executing at the beginning of the next
+    /// iteration.
+    ///
+    /// If you call `ret` too many times then the machine will panic when it
+    /// attempts to pop the last frame off the stack.
     pub fn ret(&mut self) {
         let frame = self.call_stack.pop();
         self.ip = frame.return_address;
