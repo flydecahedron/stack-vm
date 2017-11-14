@@ -219,9 +219,9 @@ mod test {
     fn run() {
         let it = instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(1, vec![2]);
-        builder.push(1, vec![3]);
-        builder.push(2, vec![]);
+        builder.push("push", vec![2]);
+        builder.push("push", vec![3]);
+        builder.push("add",  vec![]);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
         let machine = Machine::from_builder(builder, &constants);
         let mut machine = Machine::run(machine);

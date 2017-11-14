@@ -58,11 +58,11 @@ fn instruction_table() -> InstructionTable<f64> {
 fn addition_example() {
     let it = instruction_table();
     let mut builder: Builder<f64> = Builder::new(&it);
-    builder.push(0, vec![2.0]);
-    builder.push(0, vec![3.0]);
-    builder.push(1, vec![]);
-    builder.push(0, vec![4.0]);
-    builder.push(1, vec![]);
+    builder.push("push", vec![2.0]);
+    builder.push("push", vec![3.0]);
+    builder.push("add",  vec![]);
+    builder.push("push", vec![4.0]);
+    builder.push("add",  vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);
@@ -74,11 +74,11 @@ fn addition_example() {
 fn subtraction_example() {
     let it = instruction_table();
     let mut builder: Builder<f64> = Builder::new(&it);
-    builder.push(0, vec![3.0]);
-    builder.push(0, vec![4.0]);
-    builder.push(1, vec![]);
-    builder.push(0, vec![2.0]);
-    builder.push(2, vec![]);
+    builder.push("push", vec![3.0]);
+    builder.push("push", vec![4.0]);
+    builder.push("add",  vec![]);
+    builder.push("push", vec![2.0]);
+    builder.push("sub",  vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);
@@ -90,9 +90,9 @@ fn subtraction_example() {
 fn division_example() {
     let it = instruction_table();
     let mut builder: Builder<f64> = Builder::new(&it);
-    builder.push(0, vec![3.0]);
-    builder.push(0, vec![4.0]);
-    builder.push(3, vec![]);
+    builder.push("push", vec![3.0]);
+    builder.push("push", vec![4.0]);
+    builder.push("div",  vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);
@@ -104,9 +104,9 @@ fn division_example() {
 fn multiplication_example() {
     let it = instruction_table();
     let mut builder: Builder<f64> = Builder::new(&it);
-    builder.push(0, vec![3.0]);
-    builder.push(0, vec![4.0]);
-    builder.push(4, vec![]);
+    builder.push("push", vec![3.0]);
+    builder.push("push", vec![4.0]);
+    builder.push("mult", vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
     let machine = Machine::from_builder(builder, &constants);
     let mut machine = Machine::run(machine);

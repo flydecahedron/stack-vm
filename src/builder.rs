@@ -16,7 +16,7 @@
 //! instruction_table.insert(Instruction::new(0, "push", 1, push));
 //!
 //! let mut builder: Builder<f64> = Builder::new(&instruction_table);
-//! builder.push(0, vec![1.23]);
+//! builder.push("push", vec![1.23]);
 //! ```
 
 use std::fmt;
@@ -51,17 +51,16 @@ impl<'a, T: fmt::Debug>  Builder<'a, T> {
         }
     }
 
-    /// Push an op-code into the code.
+    /// Push an instruction into the code.
     ///
-    /// * `op_code` should match that of an instruction in the
-    ///   `InstructionTable`.
+    /// * `name` should match that of an instruction in the `InstructionTable`.
     /// * `args` a vector of operands to be pushed into the builder's data
     ///   section.
-    pub fn push(&mut self, op_code: usize, args: Vec<T>) {
+    pub fn push(&mut self, name: &str, args: Vec<T>) {
         let instr = self
             .instruction_table
-            .by_op_code(op_code)
-            .expect(&format!("Unable to find instruction with op code {}", op_code));
+            .by_name(name)
+            .expect(&format!("Unable to find instruction with name {:?}", name));
 
         if args.len() != instr.arity {
             panic!("Instruction {} has arity of {}, but you provided {} arguments.", instr.name, instr.arity, args.len())
@@ -165,7 +164,7 @@ mod test {
     fn push() {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(0, vec![]);
+        builder.push("noop", vec![]);
         assert!(!builder.instructions.is_empty());
     }
 
@@ -174,14 +173,14 @@ mod test {
     fn push_with_incorrect_arity() {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(0, vec![1]);
+        builder.push("noop", vec![1]);
     }
 
     #[test]
     fn label() {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(0, vec![]);
+        builder.push("noop", vec![]);
         builder.label("wow");
         assert_eq!(*builder.labels.get("wow").unwrap(), 2);
     }
@@ -190,11 +189,11 @@ mod test {
     fn debug_format() {
         let it = example_instruction_table();
         let mut builder: Builder<usize> = Builder::new(&it);
-        builder.push(0, vec![]);
-        builder.push(1, vec![123]);
-        builder.push(1, vec![456]);
+        builder.push("noop", vec![]);
+        builder.push("push", vec![123]);
+        builder.push("push", vec![456]);
         builder.label("some_function");
-        builder.push(2, vec![]);
+        builder.push("pop", vec![]);
 
         let actual = format!("{:?}", builder);
         let expected = "@0 = 123
