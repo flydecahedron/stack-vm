@@ -101,4 +101,18 @@ impl<T: fmt::Debug> Instruction<T> {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+
+    #[derive(Debug)]
+    struct Operand(i64);
+
+    fn noop(_machine: &mut Machine<Operand>, _args: &[usize]) {}
+
+    #[test]
+    fn new() {
+        let operand = Instruction::new(13, "noop", 7, noop);
+        assert_eq!(operand.op_code, 13);
+        assert_eq!(operand.name, "noop".to_string());
+        assert_eq!(operand.arity, 7);
+    }
 }

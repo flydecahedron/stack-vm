@@ -206,8 +206,8 @@ mod stack;
 mod machine;
 mod instruction_table;
 mod code;
-mod code_serialize;
-mod code_deserialize;
+mod to_byte_code;
+mod from_byte_code;
 
 pub use builder::Builder;
 pub use instruction::{Instruction, InstructionFn};
@@ -219,8 +219,8 @@ pub use stack::Stack;
 pub use machine::Machine;
 pub use instruction_table::InstructionTable;
 pub use code::Code;
-pub use code_serialize::CodeSerialize;
-pub use code_deserialize::CodeDeserialize;
+pub use to_byte_code::ToByteCode;
+pub use from_byte_code::FromByteCode;
 
 #[cfg(test)]
 mod acceptance;

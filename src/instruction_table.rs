@@ -41,6 +41,10 @@ impl<T: fmt::Debug> InstructionTable<T> {
         self.0.is_empty()
     }
 
+    /// Returns a list of symbols for use in the `Code` struct.
+    ///
+    /// Generates a vector of tuples containing the op code and the name of
+    /// each instruction.
     pub fn symbols(&self) -> Vec<(usize, String)> {
         let mut result = vec![];
         self.0.keys().for_each(|ref key| {

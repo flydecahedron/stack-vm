@@ -1,12 +1,101 @@
+//! Code
+//!
+//! This module represents a hunk of code ready to be executed by the VM.
+//! Code can be created in one of two ways:
+//!
+//! * From an instance of a `Builder`.
+//! * From dumped bytecode.
+//!
+//! ## Creating code from a Builder:
+//!
+//! ```
+//! # use stack_vm::{Machine, Instruction, InstructionTable, Code, Builder};
+//!
+//! #[derive(Debug, PartialEq)]
+//! struct Operand(i64);
+//!
+//! fn example_noop(_machine: &mut Machine<Operand>, _args: &[usize]) {}
+//!
+//! # fn main() {
+//! let mut instruction_table = InstructionTable::new();
+//! instruction_table.insert(Instruction::new(0, "noop", 0, example_noop));
+//! instruction_table.insert(Instruction::new(1, "push", 1, example_noop));
+//! instruction_table.insert(Instruction::new(2, "pop",  0, example_noop));
+//!
+//! let mut builder: Builder<Operand> = Builder::new(&instruction_table);
+//! builder.push(1, vec![Operand(13)]);
+//! builder.push(1, vec![Operand(14)]);
+//!
+//! Code::from_builder(builder);
+//! # }
+//! ```
+//!
+//! ## Creating code from bytecode
+//!
+//! Loading bytecode is pretty straight-forward.  Note that you must implement
+//! `FromByteCode` for your Operand type however.
+//!
+//! ```
+//! # extern crate stack_vm;
+//! # extern crate rmp;
+//! # use stack_vm::{Code, FromByteCode};
+//! # use std::io::Read;
+//!
+//! #[derive(Debug)]
+//! struct Operand(i64);
+//!
+//! impl FromByteCode for Operand {
+//!     fn from_byte_code(mut buf: &mut Read) -> Operand {
+//!         let value = rmp::decode::read_int(&mut buf).unwrap();
+//!         Operand(value)
+//!     }
+//! }
+//!
+//! # fn main() {
+//! let bytecode: [u8; 30] = [132, 164, 99, 111, 100, 101, 144, 164, 100, 97, 116, 97, 144, 167, 115, 121, 109, 98, 111, 108, 115, 144, 166, 108, 97, 98, 101, 108, 115, 144];
+//! let _code: Code<Operand> = Code::from_byte_code(&mut &bytecode[..]);
+//! # }
+//! ```
+//!
+//! ## Dumping code to bytecode
+//!
+//! Dumping your code to bytecode is also very straight-forward.  You will need
+//! to implement the `ToByteCode` trait on your Operand type.
+//!
+//! ```
+//! # extern crate rmp;
+//! # extern crate stack_vm;
+//! # use stack_vm::{Code, ToByteCode};
+//! # use std::io::Write;
+//!
+//! #[derive(Debug, PartialEq)]
+//! struct Operand(i64);
+//!
+//! impl ToByteCode for Operand {
+//!     fn to_byte_code(&self, mut buf: &mut Write) {
+//!         rmp::encode::write_sint(&mut buf, self.0).unwrap();
+//!     }
+//! }
+//!
+//! # fn main() {
+//! let code: Code<Operand> = Code::empty();
+//! let mut bytecode: Vec<u8> = vec![];
+//! code.to_byte_code(&mut bytecode);
+//! assert_eq!(&bytecode[..], [132, 164, 99, 111, 100, 101, 144, 164, 100, 97, 116, 97, 144, 167, 115, 121, 109, 98, 111, 108, 115, 144, 166, 108, 97, 98, 101, 108, 115, 144]);
+//! # }
+//! ```
+
 use std::fmt;
-use std::io::{Write, Read};
-use rmp::{encode,decode};
 use builder::Builder;
 use table::Table;
-use code_serialize::CodeSerialize;
-use code_deserialize::CodeDeserialize;
+mod to_byte_code;
+mod from_byte_code;
+mod debug;
 
-pub struct Code<T: fmt::Debug> {
+/// A structure containing runnable or dumpable code.
+///
+/// See the module-level docs for more details.
+pub struct Code<T> {
     pub symbols: Vec<(usize, String)>,
     pub code:    Vec<usize>,
     pub data:    Vec<T>,
@@ -14,6 +103,10 @@ pub struct Code<T: fmt::Debug> {
 }
 
 impl<T: fmt::Debug> Code<T> {
+    /// Create a code object from a builder.
+    ///
+    /// This function consumes the builder, making it unusable after it has
+    /// been converted.
     pub fn from_builder(builder: Builder<T>) -> Code<T> {
         let symbols = builder.instruction_table.symbols();
         let code    = builder.instructions;
@@ -35,22 +128,54 @@ impl<T: fmt::Debug> Code<T> {
         }
     }
 
+    /// Create an empty code.
+    ///
+    /// Not useful for anything except tests and documentation.
+    pub fn empty() -> Code<T> {
+        Code {
+            symbols: vec![],
+            code:    vec![],
+            data:    vec![],
+            labels:  vec![]
+        }
+    }
+
+    /// Retrieve a list of all symbols in the code.
+    ///
+    /// This is a list of tuples containing op codes and instruction names.
     pub fn symbols(&self) -> &[(usize, String)] {
         self.symbols.as_slice()
     }
 
+    /// Retrieve a list of instructions in the code.
+    ///
+    /// This is the executable source program of the code.  It is a simple
+    /// format based around the following:
+    ///
+    /// ```text
+    /// | Op Code | No of args | Args ...         |
+    /// | 0x01    | 0x03       | 0x01, 0x02, 0x03 |
+    /// ```
     pub fn code(&self) -> &[usize] {
         self.code.as_slice()
     }
 
+    /// Retrieve the constant data compiled into the code.
     pub fn data(&self) -> &[T] {
         self.data.as_slice()
     }
 
+    /// Retrieve a list of labels used in the program.
+    ///
+    /// Returns a list of tuples containing the IP of the label and the name of
+    /// the label.
     pub fn labels(&self) -> &[(usize, String)] {
         self.labels.as_slice()
     }
 
+    /// Returns the IP for a given label.
+    ///
+    /// This function is used within the `Machine` to perform jumps.
     pub fn get_label_ip(&self, name: &str) -> Option<usize> {
         for label in self.labels.as_slice() {
             if label.1 == name { return Some(label.0); }
@@ -59,182 +184,24 @@ impl<T: fmt::Debug> Code<T> {
     }
 }
 
-impl<T: fmt::Debug> fmt::Debug for Code<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut result = String::new();
-
-        // Write out constant data into the header.
-        for i in 0..self.data.len() {
-            result.push_str(&format!("@{} = {:?}\n", i, self.data[i]));
-        }
-
-        // Loop through the code and print out useful stuff.
-        let mut ip = 0;
-        let len = self.code.len();
-        loop {
-            if ip == len { break; }
-
-            // If this IP has a label, then print it out.
-            for label in self.labels() {
-                if ip == label.0 {
-                    result.push_str(&format!("\n.{}:\n", label.1));
-                    break;
-                }
-            }
-
-            let op_code = self.code[ip];
-            let arity   = self.code[ip + 1];
-            ip = ip + 2;
-
-            // Print this instruction's name
-            for symbol in self.symbols() {
-                if op_code == symbol.0 {
-                    result.push_str(&format!("\t{}", symbol.1));
-                    break;
-                }
-            }
-
-            for _i in 0..arity {
-                let const_idx = self.code[ip];
-                ip = ip + 1;
-                result.push_str(&format!(" @{}", const_idx));
-            }
-            result.push_str("\n");
-        }
-
-        write!(f, "{}", result)
-    }
-}
-
-impl<T: CodeSerialize + fmt::Debug> CodeSerialize for Code<T> {
-    /// Create bytecode for this `Code`.
-    ///
-    /// Encodes into a Map of the following format:
-    /// ```json
-    /// {
-    ///     "code" => [ 0, 1, 0, 0, 1, 1, 1, 0 ],
-    ///     "data" => [ 123, 456 ],
-    ///     "symbols" => [ 0, "push", 1, "add" ],
-    ///     "labels" => [ 0, "main" ]
-    /// }
-    /// ```
-    fn to_byte_code(&self, mut buf: &mut Write) {
-        // We're creating a 4-element map.
-        encode::write_map_len(&mut buf, 4).unwrap();
-
-        // First, the code.
-        encode::write_str(&mut buf, "code").unwrap();
-        encode::write_array_len(&mut buf, self.code.len() as u32).unwrap();
-        for operation in self.code() {
-            encode::write_uint(&mut buf, *operation as u64).unwrap();
-        }
-
-        // Next, the data.
-        encode::write_str(&mut buf, "data").unwrap();
-        encode::write_array_len(&mut buf, self.data.len() as u32).unwrap();
-        for operand in self.data() {
-            operand.to_byte_code(&mut buf);
-        }
-
-        // Next, the symbols.
-        encode::write_str(&mut buf, "symbols").unwrap();
-        encode::write_array_len(&mut buf, (self.symbols.len() * 2) as u32).unwrap();
-        for symbol in self.symbols() {
-            encode::write_uint(&mut buf, symbol.0 as u64).unwrap();
-            encode::write_str(&mut buf, &symbol.1).unwrap();
-        }
-
-        // Lastly, the labels.
-        encode::write_str(&mut buf, "labels").unwrap();
-        encode::write_array_len(&mut buf, (self.labels.len() * 2) as u32).unwrap();
-        for label in self.labels() {
-            encode::write_uint(&mut buf, label.0 as u64).unwrap();
-            encode::write_str(&mut buf, &label.1).unwrap();
-        }
-    }
-}
-
-impl<T: CodeDeserialize + fmt::Debug> CodeDeserialize for Code<T> {
-    fn from_byte_code(mut buf: &mut Read) -> Code<T> {
-        // We expect a four-element map.
-        let map_len = decode::read_map_len(&mut buf).unwrap();
-        assert_eq!(map_len, 4);
-
-        // We expect the code section next:
-        let section = read_string(&mut buf);
-        assert_eq!(section, "code");
-
-        let code_len = decode::read_array_len(&mut buf).unwrap();
-        let mut code: Vec<usize> = vec![];
-        for _i in 0..code_len {
-            code.push(decode::read_int(&mut buf).unwrap());
-        }
-
-        // We expect the data section next
-        let section = read_string(&mut buf);
-        assert_eq!(section, "data");
-
-        let data_len = decode::read_array_len(&mut buf).unwrap();
-        let mut data: Vec<T> = vec![];
-        for _i in 0..data_len {
-            data.push(CodeDeserialize::from_byte_code(&mut buf));
-        }
-
-        // Next, symbols.
-        let section = read_string(&mut buf);
-        assert_eq!(section, "symbols");
-
-        let symbol_len = decode::read_array_len(&mut buf).unwrap();
-        let mut symbols: Vec<(usize, String)> = vec![];
-        for _i in 0..symbol_len / 2 {
-            let idx = decode::read_int(&mut buf).unwrap();
-            let symbol = read_string(&mut buf);
-            symbols.push((idx, symbol));
-        }
-
-        // Lastly, labels.
-        let section = read_string(&mut buf);
-        assert_eq!(section, "labels");
-
-        let label_len = decode::read_array_len(&mut buf).unwrap();
-        let mut labels: Vec<(usize, String)> = vec![];
-        for _i in 0..label_len / 2 {
-            let idx = decode::read_int(&mut buf).unwrap();
-            let label = read_string(&mut buf);
-            labels.push((idx, label));
-        }
-
-        Code {
-            symbols: symbols,
-            code:    code,
-            data:    data,
-            labels:  labels
-        }
-    }
-}
-
-fn read_string(mut buf: &mut Read) -> String {
-    let len = decode::read_str_len(&mut buf).unwrap();
-    let mut strbuf: Vec<u8> = vec![0u8; len as usize];
-    buf.read_exact(&mut strbuf).unwrap();
-    String::from_utf8(strbuf).unwrap()
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
+    use rmp::{encode, decode};
+    use std::io::{Read, Write};
     use instruction::Instruction;
     use instruction_table::InstructionTable;
     use machine::Machine;
-    use code_serialize::CodeSerialize;
+    use to_byte_code::ToByteCode;
+    use from_byte_code::FromByteCode;
 
-    impl CodeSerialize for usize {
+    impl ToByteCode for usize {
         fn to_byte_code(&self, mut buf: &mut Write) {
             encode::write_uint(&mut buf, *self as u64).unwrap();
         }
     }
 
-    impl CodeDeserialize for usize {
+    impl FromByteCode for usize {
         fn from_byte_code(mut buf: &mut Read) -> usize {
             decode::read_int(&mut buf).unwrap()
         }
