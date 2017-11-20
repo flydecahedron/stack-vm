@@ -186,3 +186,10 @@ to after removing the frame.
 
 You can find an example of function calling in this package's acceptance
 tests.
+
+
+## Caveats
+
+Currently the `Stack` is "infinite" because it's implemented with a `Vec`
+behind the scenes.  I should probably provide a mechanism for users to provide
+their own stack limits after which the machine panics.
