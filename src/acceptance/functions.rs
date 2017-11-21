@@ -91,7 +91,7 @@ fn example() {
     builder.push("add",  vec![]);
     builder.push("ret",  vec![]);
     let constants: WriteManyTable<Operand> = WriteManyTable::new();
-    let machine: Machine<Operand> = Machine::from_builder(builder, &constants);
+    let machine: Machine<Operand> = Machine::new(Code::from(builder), &constants, &it);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop().to_i().unwrap();
     assert_eq!(result, 7);

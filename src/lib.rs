@@ -151,7 +151,7 @@
 //! together with the `stack_vm::Machine` to execute it.
 //!
 //! ```
-//! use stack_vm::{Instruction, InstructionTable, Machine, Builder, WriteManyTable};
+//! use stack_vm::{Instruction, InstructionTable, Machine, Builder, WriteManyTable, Code};
 //! type Operand = i64;
 //!
 //! fn push(machine: &mut Machine<Operand>, args: &[usize]) {
@@ -175,7 +175,7 @@
 //! builder.push("add", vec![]);
 //!
 //! let constants: WriteManyTable<Operand> = WriteManyTable::new();
-//! let machine = Machine::from_builder(builder, &constants);
+//! let machine = Machine::new(Code::from(builder), &constants, &instruction_table);
 //! let mut machine = Machine::run(machine);
 //! assert_eq!(machine.operand_pop(), 7);
 //! ```

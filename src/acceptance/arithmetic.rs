@@ -64,7 +64,7 @@ fn addition_example() {
     builder.push("push", vec![4.0]);
     builder.push("add",  vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::from_builder(builder, &constants);
+    let machine = Machine::new(Code::from(builder), &constants, &it);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 9.0);
@@ -80,7 +80,7 @@ fn subtraction_example() {
     builder.push("push", vec![2.0]);
     builder.push("sub",  vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::from_builder(builder, &constants);
+    let machine = Machine::new(Code::from(builder), &constants, &it);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 5.0);
@@ -94,7 +94,7 @@ fn division_example() {
     builder.push("push", vec![4.0]);
     builder.push("div",  vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::from_builder(builder, &constants);
+    let machine = Machine::new(Code::from(builder), &constants, &it);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 0.75);
@@ -108,7 +108,7 @@ fn multiplication_example() {
     builder.push("push", vec![4.0]);
     builder.push("mult", vec![]);
     let constants: WriteManyTable<f64> = WriteManyTable::new();
-    let machine = Machine::from_builder(builder, &constants);
+    let machine = Machine::new(Code::from(builder), &constants, &it);
     let mut machine = Machine::run(machine);
     let result = machine.operand_pop();
     assert_eq!(result, 12.0);

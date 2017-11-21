@@ -24,7 +24,7 @@
 //! builder.push("push", vec![Operand(13)]);
 //! builder.push("push", vec![Operand(14)]);
 //!
-//! Code::from_builder(builder);
+//! Code::from(builder);
 //! # }
 //! ```
 //!
@@ -83,6 +83,7 @@
 //! # }
 //! ```
 
+use std::convert::From;
 use std::fmt;
 use builder::Builder;
 use table::Table;
@@ -101,31 +102,6 @@ pub struct Code<T> {
 }
 
 impl<T: fmt::Debug> Code<T> {
-    /// Create a code object from a builder.
-    ///
-    /// This function consumes the builder, making it unusable after it has
-    /// been converted.
-    pub fn from_builder(builder: Builder<T>) -> Code<T> {
-        let symbols = builder.instruction_table.symbols();
-        let code    = builder.instructions;
-        let data    = builder.data;
-        let mut labels = vec![];
-        for key in builder.labels.keys() {
-            let idx = builder.labels.get(key).unwrap();
-            labels.push((*idx, key.clone()));
-        }
-        labels.sort_by(|lhs, rhs| {
-            lhs.0.cmp(&rhs.0)
-        });
-
-        Code {
-            symbols: symbols,
-            code:    code,
-            data:    data,
-            labels:  labels
-        }
-    }
-
     /// Create an empty code.
     ///
     /// Not useful for anything except tests and documentation.
@@ -182,6 +158,32 @@ impl<T: fmt::Debug> Code<T> {
     }
 }
 
+impl<'a, T: fmt::Debug> From<Builder<'a, T>> for Code<T> {
+    /// Convert a `Builder` into `Code`.
+    ///
+    /// This function consumes the builder and returns a `Code`.
+    fn from(builder: Builder<T>) -> Code<T> {
+        let symbols = builder.instruction_table.symbols();
+        let code    = builder.instructions;
+        let data    = builder.data;
+        let mut labels = vec![];
+        for key in builder.labels.keys() {
+            let idx = builder.labels.get(key).unwrap();
+            labels.push((*idx, key.clone()));
+        }
+        labels.sort_by(|lhs, rhs| {
+            lhs.0.cmp(&rhs.0)
+        });
+
+        Code {
+            symbols: symbols,
+            code:    code,
+            data:    data,
+            labels:  labels
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -221,7 +223,7 @@ mod test {
         let mut builder: Builder<usize> = Builder::new(&it);
         builder.push("push", vec![13]);
         builder.push("push", vec![14]);
-        let code: Code<usize> = Code::from_builder(builder);
+        let code: Code<usize> = Code::from(builder);
 
         assert_eq!(code.symbols().len(), 3);
         assert_eq!(code.symbols()[0], (0 as usize, "noop".to_string()));
@@ -238,7 +240,7 @@ mod test {
     fn get_label_ip() {
         let it = example_instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
-        let code: Code<usize> = Code::from_builder(builder);
+        let code: Code<usize> = Code::from(builder);
         assert_eq!(code.get_label_ip("main").unwrap(), 0);
     }
 
@@ -251,7 +253,7 @@ mod test {
         builder.push("push", vec![456]);
         builder.label("some_function");
         builder.push("pop",  vec![]);
-        let code = Code::from_builder(builder);
+        let code = Code::from(builder);
 
         let actual = format!("{:?}", code);
         let expected = "@0 = 123
@@ -277,7 +279,7 @@ mod test {
         builder.push("push", vec![456]);
         builder.label("some_function");
         builder.push("pop",  vec![]);
-        let code = Code::from_builder(builder);
+        let code = Code::from(builder);
         let mut actual: Vec<u8> = vec![];
         code.to_byte_code(&mut actual);
         let expected = [132, 164, 99, 111, 100, 101, 154, 0, 0, 1, 1, 0, 1, 1,
