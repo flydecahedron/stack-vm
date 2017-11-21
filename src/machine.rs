@@ -30,15 +30,9 @@ pub struct Machine<'a, T: 'a + fmt::Debug> {
 impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// Returns a new `Machine` ready to execute instructions.
     ///
-    /// The machine is initialised by passing in your `Builder` which contains
-    /// all the code and data of your program, and a `Table` of constants.
-    pub fn from_builder(builder: Builder<'a, T>, constants: &'a Table<Item = T>) -> Machine<'a, T> {
-        let instruction_table = builder.instruction_table.clone();
-        let code = Code::from_builder(builder);
-        Machine::from_code(code, constants, instruction_table)
-    }
-
-    pub fn from_code(code: Code<T>, constants: &'a Table<Item = T>, instruction_table: &'a InstructionTable<T>) -> Machine<'a, T> {
+    /// The machine is initialised by passing in your `Code` which contains
+    /// all the code and data of your program, and a `Table` of constants`.
+    pub fn new(code: Code<T>, constants: &'a Table<Item = T>, instruction_table: &'a InstructionTable<T>) -> Machine<'a, T> {
         let frame: Frame<T> = Frame::new(code.code.len());
         let mut call_stack = Stack::new();
         call_stack.push(frame);
@@ -209,7 +203,7 @@ mod test {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let machine = Machine::from_builder(builder, &constants);
+        let machine = Machine::new(Code::from(builder), &constants, &it);
         assert_eq!(machine.ip, 0);
         assert!(!machine.call_stack.is_empty());
         assert!(machine.operand_stack.is_empty());
@@ -223,7 +217,7 @@ mod test {
         builder.push("push", vec![3]);
         builder.push("add",  vec![]);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let machine = Machine::from_builder(builder, &constants);
+        let machine = Machine::new(Code::from(builder), &constants, &it);
         let mut machine = Machine::run(machine);
         let result = machine.operand_stack.pop();
         assert_eq!(result, 5);
@@ -234,7 +228,7 @@ mod test {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let mut machine = Machine::from_builder(builder, &constants);
+        let mut machine = Machine::new(Code::from(builder), &constants, &it);
         assert!(machine.get_local("example").is_none());
         machine.set_local("example", 13);
         assert!(machine.get_local("example").is_some());
@@ -247,7 +241,7 @@ mod test {
         builder.label("next");
 
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let mut machine = Machine::from_builder(builder, &constants);
+        let mut machine = Machine::new(Code::from(builder), &constants, &it);
         machine.set_local("outer", 13);
         assert_eq!(*machine.get_local_deep("outer").unwrap(), 13);
         machine.jump("next");
@@ -265,7 +259,7 @@ mod test {
         let it = instruction_table();
         let builder: Builder<usize> = Builder::new(&it);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let mut machine = Machine::from_builder(builder, &constants);
+        let mut machine = Machine::new(Code::from(builder), &constants, &it);
         assert!(machine.get_local("example").is_none());
         machine.set_local("example", 13);
         assert_eq!(*machine.get_local("example").unwrap(), 13);

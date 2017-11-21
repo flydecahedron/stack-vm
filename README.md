@@ -163,12 +163,12 @@ instruction_table.insert(Instruction::new(0, "push", 1, push));
 instruction_table.insert(Instruction::new(1, "add",  0, add));
 
 let mut builder: Builder<Operand> = Builder::new(&instruction_table);
-builder.push(0, vec![3 as Operand]);
-builder.push(0, vec![4 as Operand]);
-builder.push(1, vec![]);
+builder.push("push", vec![3 as Operand]);
+builder.push("push", vec![4 as Operand]);
+builder.push("add", vec![]);
 
 let constants: WriteManyTable<Operand> = WriteManyTable::new();
-let machine = Machine::from_builder(builder, &constants);
+let machine = Machine::from(builder, &constants);
 let mut machine = Machine::run(machine);
 assert_eq!(machine.operand_pop(), 7);
 ```
