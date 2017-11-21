@@ -31,14 +31,14 @@ use table::Table;
 /// * a list of instructions that have been pushed into this builder.
 /// * a `Table` of labels used for jumping.
 /// * a list of `T` to be stored in the builder's data section.
-pub struct Builder<'a, T: 'a + fmt::Debug> {
+pub struct Builder<'a, T: 'a + fmt::Debug + PartialEq> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions:      Vec<usize>,
     pub labels:            WriteOnceTable<usize>,
     pub data:              Vec<T>,
 }
 
-impl<'a, T: fmt::Debug>  Builder<'a, T> {
+impl<'a, T: fmt::Debug + PartialEq>  Builder<'a, T> {
     /// Create a new `Builder` from an `InstructionTable`.
     pub fn new(instruction_table: &'a InstructionTable<T>) -> Builder<T> {
         let mut labels = WriteOnceTable::new();
@@ -69,8 +69,8 @@ impl<'a, T: fmt::Debug>  Builder<'a, T> {
         self.instructions.push(instr.op_code);
         self.instructions.push(instr.arity);
         for arg in args {
-            self.data.push(arg);
-            self.instructions.push(self.data.len() - 1);
+            let pos = self.push_data(arg);
+            self.instructions.push(pos);
         }
     }
 
@@ -89,9 +89,20 @@ impl<'a, T: fmt::Debug>  Builder<'a, T> {
     pub fn len(&self) -> usize {
         self.instructions.len()
     }
+
+    fn push_data(&mut self, data: T) -> usize {
+        let pos = self.data.iter().position(|d| d == &data);
+        match pos {
+            Some(pos) => pos,
+            None => {
+                self.data.push(data);
+                self.data.len() - 1
+            }
+        }
+    }
 }
 
-impl<'a, T: 'a + fmt::Debug> fmt::Debug for Builder<'a, T> {
+impl<'a, T: 'a + fmt::Debug + PartialEq> fmt::Debug for Builder<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut result = String::new();
 
@@ -183,6 +194,16 @@ mod test {
         builder.push("noop", vec![]);
         builder.label("wow");
         assert_eq!(*builder.labels.get("wow").unwrap(), 2);
+    }
+
+    #[test]
+    fn data_is_deduped() {
+        let it = example_instruction_table();
+        let mut builder: Builder<usize> = Builder::new(&it);
+        builder.push("push", vec![123]);
+        builder.push("push", vec![123]);
+        builder.push("push", vec![123]);
+        assert_eq!(builder.data.len(), 1);
     }
 
     #[test]

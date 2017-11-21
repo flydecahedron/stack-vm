@@ -6,7 +6,6 @@ use std::fmt;
 use stack::Stack;
 use frame::Frame;
 use table::Table;
-use builder::Builder;
 use code::Code;
 use instruction_table::InstructionTable;
 
@@ -179,6 +178,7 @@ mod test {
     use write_many_table::WriteManyTable;
     use instruction::Instruction;
     use instruction_table::InstructionTable;
+    use builder::Builder;
 
     fn push(machine: &mut Machine<usize>, args: &[usize]) {
         let arg = machine.code.data.get(args[0]).unwrap();

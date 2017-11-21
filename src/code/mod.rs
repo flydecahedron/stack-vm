@@ -158,7 +158,7 @@ impl<T: fmt::Debug> Code<T> {
     }
 }
 
-impl<'a, T: fmt::Debug> From<Builder<'a, T>> for Code<T> {
+impl<'a, T: fmt::Debug + PartialEq> From<Builder<'a, T>> for Code<T> {
     /// Convert a `Builder` into `Code`.
     ///
     /// This function consumes the builder and returns a `Code`.
