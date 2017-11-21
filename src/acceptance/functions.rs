@@ -13,7 +13,7 @@
 use super::super::*;
 
 /// Our operand type.  An enum to contain multiple types.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 enum Operand {
     I(i64),
     S(String)
