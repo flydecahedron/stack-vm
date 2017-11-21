@@ -1,6 +1,6 @@
 [package]
 name = "stack-vm"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["James Harton <james@automat.nz>"]
 license = "MIT"
 description = "A generic, reusable, stack-based virtual machine."
