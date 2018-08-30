@@ -26,9 +26,7 @@ impl<T: fmt::Debug> InstructionTable<T> {
 
     /// Retrieve an instruction by looking up it's name.
     pub fn by_name(&self, name: &str) -> Option<&Instruction<T>> {
-        self.0
-            .values()
-            .find(|ref instr| instr.name == name)
+        self.0.values().find(|ref instr| instr.name == name)
     }
 
     /// Insert an instruction into the table.
@@ -51,9 +49,7 @@ impl<T: fmt::Debug> InstructionTable<T> {
             let instr = self.0.get(key).unwrap();
             result.push((instr.op_code, instr.name.clone()));
         });
-        result.sort_by(|lhs, rhs| {
-            lhs.0.cmp(&rhs.0)
-        });
+        result.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
         result
     }
 }
@@ -77,5 +73,21 @@ mod test {
         assert!(table.is_empty());
         table.insert(Instruction::new(0, "NOOP", 0, noop));
         assert!(!table.is_empty());
+    }
+
+    #[test]
+    fn by_op_code() {
+        let mut table: InstructionTable<usize> = InstructionTable::new();
+        table.insert(Instruction::new(0, "NOOP", 0, noop));
+        let instr = table.by_op_code(0).unwrap();
+        assert_eq!(instr.name, "NOOP");
+    }
+
+    #[test]
+    fn by_name() {
+        let mut table: InstructionTable<usize> = InstructionTable::new();
+        table.insert(Instruction::new(0, "NOOP", 0, noop));
+        let instr = table.by_name("NOOP").unwrap();
+        assert_eq!(instr.op_code, 0);
     }
 }
