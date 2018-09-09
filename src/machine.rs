@@ -2,12 +2,12 @@
 //!
 //! Pour all your ingredients into `Machine` and make it dance.
 
-use std::fmt;
-use stack::Stack;
-use frame::Frame;
-use table::Table;
 use code::Code;
+use frame::Frame;
 use instruction_table::InstructionTable;
+use stack::Stack;
+use std::fmt;
+use table::Table;
 
 /// `Machine` contains all the information needed to run your program.
 ///
@@ -31,18 +31,22 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     ///
     /// The machine is initialised by passing in your `Code` which contains
     /// all the code and data of your program, and a `Table` of constants`.
-    pub fn new(code: Code<T>, constants: &'a Table<Item = T>, instruction_table: &'a InstructionTable<T>) -> Machine<'a, T> {
+    pub fn new(
+        code: Code<T>,
+        constants: &'a Table<Item = T>,
+        instruction_table: &'a InstructionTable<T>,
+    ) -> Machine<'a, T> {
         let frame: Frame<T> = Frame::new(code.code.len());
         let mut call_stack = Stack::new();
         call_stack.push(frame);
 
         Machine {
-            code:              code,
+            code: code,
             instruction_table: instruction_table,
-            ip:                0,
-            constants:         constants,
-            call_stack:        call_stack,
-            operand_stack:     Stack::new()
+            ip: 0,
+            constants: constants,
+            call_stack: call_stack,
+            operand_stack: Stack::new(),
         }
     }
 
@@ -56,30 +60,31 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     ///
     /// Stops when either the last instruction is executed or when the
     /// last frame is removed from the call stack.
-    pub fn run(mut machine: Machine<'a, T>) -> Machine<'a, T> {
+    pub fn run(&mut self) {
         loop {
-            if machine.ip == machine.code.code.len() { break; }
+            if self.ip == self.code.code.len() {
+                break;
+            }
 
-            let op_code = machine.code.code[machine.ip];
-            let arity   = machine.code.code[machine.ip + 1];
-            machine.ip  = machine.ip + 2;
+            let op_code = self.code.code[self.ip];
+            let arity = self.code.code[self.ip + 1];
+            self.ip = self.ip + 2;
 
-            let instr = machine
-                .instruction_table
-                .by_op_code(op_code)
-                .expect(&format!("Unable to find instruction with op code {}", op_code));
+            let instr = self.instruction_table.by_op_code(op_code).expect(&format!(
+                "Unable to find instruction with op code {}",
+                op_code
+            ));
 
             let mut args: Vec<usize> = vec![];
 
             for _i in 0..arity {
-                args.push(machine.code.code[machine.ip]);
-                machine.ip = machine.ip + 1;
+                args.push(self.code.code[self.ip]);
+                self.ip = self.ip + 1;
             }
 
             let fun = instr.fun;
-            fun(&mut machine, args.as_slice());
+            fun(self, args.as_slice());
         }
-        machine
     }
 
     /// Look up a local variable in the current call frame.
@@ -87,9 +92,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// Note that the variable may not be set in the current frame but it's up
     /// to your instruction to figure out how to deal with this situation.
     pub fn get_local(&self, name: &str) -> Option<&T> {
-        self.call_stack
-            .peek()
-            .get_local(name)
+        self.call_stack.peek().get_local(name)
     }
 
     /// Look for a local variable in all call frames.
@@ -100,7 +103,9 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     pub fn get_local_deep(&self, name: &str) -> Option<&T> {
         for frame in self.call_stack.as_slice().iter().rev() {
             let local = frame.get_local(name);
-            if local.is_some() { return local; }
+            if local.is_some() {
+                return local;
+            }
         }
         None
     }
@@ -109,21 +114,17 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     ///
     /// Places a value in the frame's local variable table.
     pub fn set_local(&mut self, name: &str, value: T) {
-        self.call_stack
-            .peek_mut()
-            .set_local(name, value)
+        self.call_stack.peek_mut().set_local(name, value)
     }
 
     /// Push an operand onto the operand stack.
     pub fn operand_push(&mut self, value: T) {
-        self.operand_stack
-            .push(value);
+        self.operand_stack.push(value);
     }
 
     /// Pop an operand off the operand stack.
     pub fn operand_pop(&mut self) -> T {
-        self.operand_stack
-            .pop()
+        self.operand_stack.pop()
     }
 
     /// Retrieve a reference to a `T` stored in the Code's data section.
@@ -145,7 +146,8 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     ///
     /// This method specifically does not transfer operands to call arguments.
     pub fn jump(&mut self, label: &str) {
-        let new_ip = self.code
+        let new_ip = self
+            .code
             .get_label_ip(label)
             .expect(&format!("Attempt to jump to unknown label {}", label));
         let old_ip = self.ip;
@@ -175,10 +177,10 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use write_many_table::WriteManyTable;
+    use builder::Builder;
     use instruction::Instruction;
     use instruction_table::InstructionTable;
-    use builder::Builder;
+    use write_many_table::WriteManyTable;
 
     fn push(machine: &mut Machine<usize>, args: &[usize]) {
         let arg = machine.code.data.get(args[0]).unwrap();
@@ -194,7 +196,7 @@ mod test {
     fn instruction_table() -> InstructionTable<usize> {
         let mut it = InstructionTable::new();
         it.insert(Instruction::new(1, "push", 1, push));
-        it.insert(Instruction::new(2, "add",  0, add));
+        it.insert(Instruction::new(2, "add", 0, add));
         it
     }
 
@@ -215,10 +217,10 @@ mod test {
         let mut builder: Builder<usize> = Builder::new(&it);
         builder.push("push", vec![2]);
         builder.push("push", vec![3]);
-        builder.push("add",  vec![]);
+        builder.push("add", vec![]);
         let constants: WriteManyTable<usize> = WriteManyTable::new();
-        let machine = Machine::new(Code::from(builder), &constants, &it);
-        let mut machine = Machine::run(machine);
+        let mut machine = Machine::new(Code::from(builder), &constants, &it);
+        machine.run();
         let result = machine.operand_stack.pop();
         assert_eq!(result, 5);
     }

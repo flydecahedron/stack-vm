@@ -16,21 +16,21 @@ use super::super::*;
 #[derive(Clone, Debug, PartialEq)]
 enum Operand {
     I(i64),
-    S(String)
+    S(String),
 }
 
 impl Operand {
     fn to_i(&self) -> Option<i64> {
         match self {
             &Operand::I(i) => Some(i),
-            _ => None
+            _ => None,
         }
     }
 
     fn to_s(&self) -> Option<&str> {
         match self {
             &Operand::S(ref s) => Some(s),
-            _ => None
+            _ => None,
         }
     }
 }
@@ -65,9 +65,9 @@ fn ret(machine: &mut Machine<Operand>, _args: &[usize]) {
 fn instruction_table() -> InstructionTable<Operand> {
     let mut it = InstructionTable::new();
     it.insert(Instruction::new(0, "push", 1, push));
-    it.insert(Instruction::new(1, "add",  0, add));
+    it.insert(Instruction::new(1, "add", 0, add));
     it.insert(Instruction::new(2, "call", 1, call));
-    it.insert(Instruction::new(3, "ret",  0, ret));
+    it.insert(Instruction::new(3, "ret", 0, ret));
     it
 }
 
@@ -86,13 +86,13 @@ fn example() {
     builder.push("push", vec![op_i(3)]);
     builder.push("push", vec![op_i(4)]);
     builder.push("call", vec![op_s("add_fun")]);
-    builder.push("ret",  vec![]);
+    builder.push("ret", vec![]);
     builder.label("add_fun");
-    builder.push("add",  vec![]);
-    builder.push("ret",  vec![]);
+    builder.push("add", vec![]);
+    builder.push("ret", vec![]);
     let constants: WriteManyTable<Operand> = WriteManyTable::new();
-    let machine: Machine<Operand> = Machine::new(Code::from(builder), &constants, &it);
-    let mut machine = Machine::run(machine);
+    let mut machine: Machine<Operand> = Machine::new(Code::from(builder), &constants, &it);
+    machine.run();
     let result = machine.operand_pop().to_i().unwrap();
     assert_eq!(result, 7);
 }

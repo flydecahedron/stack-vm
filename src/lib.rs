@@ -175,8 +175,8 @@
 //! builder.push("add", vec![]);
 //!
 //! let constants: WriteManyTable<Operand> = WriteManyTable::new();
-//! let machine = Machine::new(Code::from(builder), &constants, &instruction_table);
-//! let mut machine = Machine::run(machine);
+//! let mut machine = Machine::new(Code::from(builder), &constants, &instruction_table);
+//! machine.run();
 //! assert_eq!(machine.operand_pop(), 7);
 //! ```
 //!
@@ -197,30 +197,30 @@
 extern crate rmp;
 
 mod builder;
-mod instruction;
-mod write_once_table;
-mod write_many_table;
-mod table;
-mod frame;
-mod stack;
-mod machine;
-mod instruction_table;
 mod code;
-mod to_byte_code;
+mod frame;
 mod from_byte_code;
+mod instruction;
+mod instruction_table;
+mod machine;
+mod stack;
+mod table;
+mod to_byte_code;
+mod write_many_table;
+mod write_once_table;
 
 pub use builder::Builder;
-pub use instruction::{Instruction, InstructionFn};
-pub use write_once_table::WriteOnceTable;
-pub use write_many_table::WriteManyTable;
-pub use table::Table;
-pub use frame::Frame;
-pub use stack::Stack;
-pub use machine::Machine;
-pub use instruction_table::InstructionTable;
 pub use code::Code;
-pub use to_byte_code::ToByteCode;
+pub use frame::Frame;
 pub use from_byte_code::FromByteCode;
+pub use instruction::{Instruction, InstructionFn};
+pub use instruction_table::InstructionTable;
+pub use machine::Machine;
+pub use stack::Stack;
+pub use table::Table;
+pub use to_byte_code::ToByteCode;
+pub use write_many_table::WriteManyTable;
+pub use write_once_table::WriteOnceTable;
 
 #[cfg(test)]
 mod acceptance;
