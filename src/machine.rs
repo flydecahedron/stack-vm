@@ -66,9 +66,8 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
                 break;
             }
 
-            let op_code = self.code.code[self.ip];
-            let arity = self.code.code[self.ip + 1];
-            self.ip = self.ip + 2;
+            let op_code = self.next_code();
+            let arity = self.next_code();
 
             let instr = self.instruction_table.by_op_code(op_code).expect(&format!(
                 "Unable to find instruction with op code {}",
@@ -78,13 +77,21 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
             let mut args: Vec<usize> = vec![];
 
             for _i in 0..arity {
-                args.push(self.code.code[self.ip]);
-                self.ip = self.ip + 1;
+                args.push(self.next_code());
             }
 
             let fun = instr.fun;
             fun(self, args.as_slice());
         }
+    }
+
+    /// Retrieve the next instruction of the program and increment
+    /// the instruction pointer.
+    #[inline]
+    fn next_code(&mut self) -> usize {
+        let code = self.code.code[self.ip];
+        self.ip = self.ip + 1;
+        code
     }
 
     /// Look up a local variable in the current call frame.
