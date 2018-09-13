@@ -53,7 +53,7 @@ fn add(machine: &mut Machine<Operand>, _args: &[usize]) {
 /// to jump to it.
 fn call(machine: &mut Machine<Operand>, args: &[usize]) {
     let label = machine.get_data(args[0]).clone();
-    machine.jump(label.to_s().unwrap());
+    machine.call(label.to_s().unwrap());
 }
 
 /// Ask the interpreter to perform a return.
@@ -71,21 +71,25 @@ fn instruction_table() -> InstructionTable<Operand> {
     it
 }
 
-fn op_i(i: i64) -> Operand {
-    Operand::I(i)
+impl From<i64> for Operand {
+    fn from(i: i64) -> Self {
+        Operand::I(i)
+    }
 }
 
-fn op_s(s: &str) -> Operand {
-    Operand::S(String::from(s))
+impl<'a> From<&'a str> for Operand {
+    fn from(s: &'a str) -> Self {
+        Operand::S(s.to_string())
+    }
 }
 
 #[test]
 fn example() {
     let it = instruction_table();
     let mut builder: Builder<Operand> = Builder::new(&it);
-    builder.push("push", vec![op_i(3)]);
-    builder.push("push", vec![op_i(4)]);
-    builder.push("call", vec![op_s("add_fun")]);
+    builder.push("push", vec![Operand::from(3)]);
+    builder.push("push", vec![Operand::from(4)]);
+    builder.push("call", vec![Operand::from("add_fun")]);
     builder.push("ret", vec![]);
     builder.label("add_fun");
     builder.push("add", vec![]);

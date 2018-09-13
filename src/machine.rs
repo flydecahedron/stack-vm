@@ -146,20 +146,30 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     ///
     /// This method performs the following actions:
     /// * Retrieve the instruction pointer for a given label from the Code.
-    /// * Create a new frame with it's return address set to the current
-    ///   instruction pointer.
-    /// * Push the new frame onto the call stack.
     /// * Set the machine's instruction pointer to the new location.
     ///
-    /// This method specifically does not transfer operands to call arguments.
+    /// This method will panic the thread if the label does not exist.
     pub fn jump(&mut self, label: &str) {
-        let new_ip = self
+        self.ip = self
             .code
             .get_label_ip(label)
-            .expect(&format!("Attempt to jump to unknown label {}", label));
-        let old_ip = self.ip;
-        self.call_stack.push(Frame::new(old_ip));
-        self.ip = new_ip;
+            .expect(&format!("Attempted to jump to unknown label {}", label));
+    }
+
+    /// Performs a call to a named label.
+    ///
+    /// This method is very similar to `jump` except that it records it's
+    /// current instruction pointer and saves it in the call stack.
+    ///
+    /// This method performs the following actions:
+    /// * Create a new frame with it's return address set to the current
+    ///   instruction pointer.
+    /// * Jump to the named label using `jump`.
+    ///
+    /// This method specifically does not transfer operands to call arguments.
+    pub fn call(&mut self, label: &str) {
+        self.call_stack.push(Frame::new(self.ip));
+        self.jump(label);
     }
 
     /// Performs a return.
@@ -253,7 +263,7 @@ mod test {
         let mut machine = Machine::new(Code::from(builder), &constants, &it);
         machine.set_local("outer", 13);
         assert_eq!(*machine.get_local_deep("outer").unwrap(), 13);
-        machine.jump("next");
+        machine.call("next");
         machine.set_local("outer", 14);
         machine.set_local("inner", 15);
         assert_eq!(*machine.get_local_deep("outer").unwrap(), 14);
