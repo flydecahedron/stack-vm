@@ -83,22 +83,22 @@
 //! # }
 //! ```
 
+use builder::Builder;
 use std::convert::From;
 use std::fmt;
-use builder::Builder;
 use table::Table;
-mod to_byte_code;
-mod from_byte_code;
 mod debug;
+mod from_byte_code;
+mod to_byte_code;
 
 /// A structure containing runnable or dumpable code.
 ///
 /// See the module-level docs for more details.
 pub struct Code<T> {
     pub symbols: Vec<(usize, String)>,
-    pub code:    Vec<usize>,
-    pub data:    Vec<T>,
-    pub labels:  Vec<(usize, String)>
+    pub code: Vec<usize>,
+    pub data: Vec<T>,
+    pub labels: Vec<(usize, String)>,
 }
 
 impl<T: fmt::Debug> Code<T> {
@@ -108,9 +108,9 @@ impl<T: fmt::Debug> Code<T> {
     pub fn empty() -> Code<T> {
         Code {
             symbols: vec![],
-            code:    vec![],
-            data:    vec![],
-            labels:  vec![]
+            code: vec![],
+            data: vec![],
+            labels: vec![],
         }
     }
 
@@ -152,7 +152,9 @@ impl<T: fmt::Debug> Code<T> {
     /// This function is used within the `Machine` to perform jumps.
     pub fn get_label_ip(&self, name: &str) -> Option<usize> {
         for label in self.labels.as_slice() {
-            if label.1 == name { return Some(label.0); }
+            if label.1 == name {
+                return Some(label.0);
+            }
         }
         None
     }
@@ -164,22 +166,20 @@ impl<'a, T: fmt::Debug + PartialEq> From<Builder<'a, T>> for Code<T> {
     /// This function consumes the builder and returns a `Code`.
     fn from(builder: Builder<T>) -> Code<T> {
         let symbols = builder.instruction_table.symbols();
-        let code    = builder.instructions;
-        let data    = builder.data;
+        let code = builder.instructions;
+        let data = builder.data;
         let mut labels = vec![];
         for key in builder.labels.keys() {
             let idx = builder.labels.get(key).unwrap();
             labels.push((*idx, key.clone()));
         }
-        labels.sort_by(|lhs, rhs| {
-            lhs.0.cmp(&rhs.0)
-        });
+        labels.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
 
         Code {
             symbols: symbols,
-            code:    code,
-            data:    data,
-            labels:  labels
+            code: code,
+            data: data,
+            labels: labels,
         }
     }
 }
@@ -187,13 +187,13 @@ impl<'a, T: fmt::Debug + PartialEq> From<Builder<'a, T>> for Code<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use rmp::{encode, decode};
-    use std::io::{Read, Write};
+    use from_byte_code::FromByteCode;
     use instruction::Instruction;
     use instruction_table::InstructionTable;
     use machine::Machine;
+    use rmp::{decode, encode};
+    use std::io::{Read, Write};
     use to_byte_code::ToByteCode;
-    use from_byte_code::FromByteCode;
 
     impl ToByteCode for usize {
         fn to_byte_code(&self, mut buf: &mut Write) {
@@ -252,7 +252,7 @@ mod test {
         builder.push("push", vec![123]);
         builder.push("push", vec![456]);
         builder.label("some_function");
-        builder.push("pop",  vec![]);
+        builder.push("pop", vec![]);
         let code = Code::from(builder);
 
         let actual = format!("{:?}", code);
@@ -278,33 +278,49 @@ mod test {
         builder.push("push", vec![123]);
         builder.push("push", vec![456]);
         builder.label("some_function");
-        builder.push("pop",  vec![]);
+        builder.push("pop", vec![]);
         let code = Code::from(builder);
         let mut actual: Vec<u8> = vec![];
         code.to_byte_code(&mut actual);
-        let expected = [132, 164, 99, 111, 100, 101, 154, 0, 0, 1, 1, 0, 1, 1,
-                        1, 2, 0, 164, 100, 97, 116, 97, 146, 123, 205, 1, 200,
-                        167, 115, 121, 109, 98, 111, 108, 115, 150, 0, 164,
-                        110, 111, 111, 112, 1, 164, 112, 117, 115, 104, 2, 163,
-                        112, 111, 112, 166, 108, 97, 98, 101, 108, 115, 148, 0,
-                        164, 109, 97, 105, 110, 8, 173, 115, 111, 109, 101, 95,
-                        102, 117, 110, 99, 116, 105, 111, 110];
+        let expected = [
+            132, 164, 99, 111, 100, 101, 154, 0, 0, 1, 1, 0, 1, 1, 1, 2, 0, 164, 100, 97, 116, 97,
+            146, 123, 205, 1, 200, 167, 115, 121, 109, 98, 111, 108, 115, 150, 0, 164, 110, 111,
+            111, 112, 1, 164, 112, 117, 115, 104, 2, 163, 112, 111, 112, 166, 108, 97, 98, 101,
+            108, 115, 148, 0, 164, 109, 97, 105, 110, 8, 173, 115, 111, 109, 101, 95, 102, 117,
+            110, 99, 116, 105, 111, 110,
+        ];
         assert_eq!(&actual[..], &expected[..]);
     }
 
     #[test]
     fn from_byte_code() {
-        let bytecode: [u8; 82] = [132, 164, 99, 111, 100, 101, 154, 0, 0, 1, 1, 0, 1, 1,
-                    1, 2, 0, 164, 100, 97, 116, 97, 146, 123, 205, 1, 200,
-                    167, 115, 121, 109, 98, 111, 108, 115, 150, 0, 164,
-                    110, 111, 111, 112, 1, 164, 112, 117, 115, 104, 2, 163,
-                    112, 111, 112, 166, 108, 97, 98, 101, 108, 115, 148, 0,
-                    164, 109, 97, 105, 110, 8, 173, 115, 111, 109, 101, 95,
-                    102, 117, 110, 99, 116, 105, 111, 110];
+        let bytecode: [u8; 82] = [
+            132, 164, 99, 111, 100, 101, 154, 0, 0, 1, 1, 0, 1, 1, 1, 2, 0, 164, 100, 97, 116, 97,
+            146, 123, 205, 1, 200, 167, 115, 121, 109, 98, 111, 108, 115, 150, 0, 164, 110, 111,
+            111, 112, 1, 164, 112, 117, 115, 104, 2, 163, 112, 111, 112, 166, 108, 97, 98, 101,
+            108, 115, 148, 0, 164, 109, 97, 105, 110, 8, 173, 115, 111, 109, 101, 95, 102, 117,
+            110, 99, 116, 105, 111, 110,
+        ];
         let code: Code<usize> = Code::from_byte_code(&mut &bytecode[..]);
-        assert_eq!(code.code, [0x0, 0x0, 0x1, 0x1, 0x0, 0x1, 0x1, 0x1, 0x2, 0x0]);
+        assert_eq!(
+            code.code,
+            [0x0, 0x0, 0x1, 0x1, 0x0, 0x1, 0x1, 0x1, 0x2, 0x0]
+        );
         assert_eq!(code.data, [123, 456]);
-        assert_eq!(code.symbols, [(0 as usize, "noop".to_string()), (1 as usize, "push".to_string()), (2 as usize, "pop".to_string())]);
-        assert_eq!(code.labels, [(0 as usize, "main".to_string()), (8 as usize, "some_function".to_string())])
+        assert_eq!(
+            code.symbols,
+            [
+                (0 as usize, "noop".to_string()),
+                (1 as usize, "push".to_string()),
+                (2 as usize, "pop".to_string())
+            ]
+        );
+        assert_eq!(
+            code.labels,
+            [
+                (0 as usize, "main".to_string()),
+                (8 as usize, "some_function".to_string())
+            ]
+        )
     }
 }

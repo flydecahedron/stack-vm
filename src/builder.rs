@@ -19,10 +19,10 @@
 //! builder.push("push", vec![1.23]);
 //! ```
 
-use std::fmt;
 use instruction_table::InstructionTable;
-use write_once_table::WriteOnceTable;
+use std::fmt;
 use table::Table;
+use write_once_table::WriteOnceTable;
 
 /// The builder struct.
 ///
@@ -33,21 +33,21 @@ use table::Table;
 /// * a list of `T` to be stored in the builder's data section.
 pub struct Builder<'a, T: 'a + fmt::Debug + PartialEq> {
     pub instruction_table: &'a InstructionTable<T>,
-    pub instructions:      Vec<usize>,
-    pub labels:            WriteOnceTable<usize>,
-    pub data:              Vec<T>,
+    pub instructions: Vec<usize>,
+    pub labels: WriteOnceTable<usize>,
+    pub data: Vec<T>,
 }
 
-impl<'a, T: fmt::Debug + PartialEq>  Builder<'a, T> {
+impl<'a, T: fmt::Debug + PartialEq> Builder<'a, T> {
     /// Create a new `Builder` from an `InstructionTable`.
     pub fn new(instruction_table: &'a InstructionTable<T>) -> Builder<T> {
         let mut labels = WriteOnceTable::new();
         labels.insert("main", 0);
         Builder {
             instruction_table: &instruction_table,
-            instructions:      vec![],
-            labels:            labels,
-            data:              vec![],
+            instructions: vec![],
+            labels: labels,
+            data: vec![],
         }
     }
 
@@ -63,7 +63,12 @@ impl<'a, T: fmt::Debug + PartialEq>  Builder<'a, T> {
             .expect(&format!("Unable to find instruction with name {:?}", name));
 
         if args.len() != instr.arity {
-            panic!("Instruction {} has arity of {}, but you provided {} arguments.", instr.name, instr.arity, args.len())
+            panic!(
+                "Instruction {} has arity of {}, but you provided {} arguments.",
+                instr.name,
+                instr.arity,
+                args.len()
+            )
         }
 
         self.instructions.push(instr.op_code);
@@ -113,8 +118,6 @@ impl<'a, T: 'a + fmt::Debug + PartialEq> fmt::Debug for Builder<'a, T> {
         let mut ip = 0;
         let len = self.instructions.len();
         loop {
-            if ip == len { break; }
-
             for label in self.labels.keys() {
                 let idx = *self.labels.get(label).unwrap();
                 if idx == ip {
@@ -122,14 +125,18 @@ impl<'a, T: 'a + fmt::Debug + PartialEq> fmt::Debug for Builder<'a, T> {
                 }
             }
 
+            if ip == len {
+                break;
+            }
+
             let op_code = self.instructions[ip];
             ip = ip + 1;
-            let arity   = self.instructions[ip];
+            let arity = self.instructions[ip];
 
-            let instr = self
-                .instruction_table
-                .by_op_code(op_code)
-                .expect(&format!("Unable to find instruction with op code {}", op_code));
+            let instr = self.instruction_table.by_op_code(op_code).expect(&format!(
+                "Unable to find instruction with op code {}",
+                op_code
+            ));
 
             result.push_str(&format!("\t{}", &instr.name));
 

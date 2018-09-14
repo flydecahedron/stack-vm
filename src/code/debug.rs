@@ -1,5 +1,5 @@
-use std::fmt;
 use super::Code;
+use std::fmt;
 
 impl<T: fmt::Debug> fmt::Debug for Code<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -14,8 +14,6 @@ impl<T: fmt::Debug> fmt::Debug for Code<T> {
         let mut ip = 0;
         let len = self.code.len();
         loop {
-            if ip == len { break; }
-
             // If this IP has a label, then print it out.
             for label in self.labels() {
                 if ip == label.0 {
@@ -24,8 +22,12 @@ impl<T: fmt::Debug> fmt::Debug for Code<T> {
                 }
             }
 
+            if ip == len {
+                break;
+            }
+
             let op_code = self.code[ip];
-            let arity   = self.code[ip + 1];
+            let arity = self.code[ip + 1];
             ip = ip + 2;
 
             // Print this instruction's name
