@@ -193,3 +193,8 @@ tests.
 Currently the `Stack` is "infinite" because it's implemented with a `Vec`
 behind the scenes.  I should probably provide a mechanism for users to provide
 their own stack limits after which the machine panics.
+
+
+## More information
+
+I wrote a series of [blogs on dev.to](https://dev.to/jimsy/building-a-stack-based-virtual-machine-5gkd) which might be useful if you're starting from zilch.

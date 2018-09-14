@@ -4,7 +4,6 @@ version = "1.0.0"
 authors = ["James Harton <james@automat.nz>"]
 license = "MIT"
 description = "A generic, reusable, stack-based virtual machine."
-documentation = "https://docs.rs/crate/stack-vm"
 repository = "https://gitlab.com/huia-lang/stack-vm"
 readme = "README.md"
 
