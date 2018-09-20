@@ -72,17 +72,17 @@ impl<'a> From<&'a str> for Operand {
 
 #[test]
 fn condition_true() {
-    let result = condition_machine(Operand::from(1));
+    let result = conditional_program(Operand::from(1));
     assert_eq!(result.to_s().unwrap(), "it was true")
 }
 
 #[test]
 fn condition_false() {
-    let result = condition_machine(Operand::from(0));
+    let result = conditional_program(Operand::from(0));
     assert_eq!(result.to_s().unwrap(), "it was false")
 }
 
-fn condition_machine(condition: Operand) -> Operand {
+fn conditional_program(condition: Operand) -> Operand {
     let it = instruction_table();
     let mut builder: Builder<Operand> = Builder::new(&it);
     builder.push("push", vec![condition]);
