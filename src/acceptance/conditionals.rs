@@ -2,7 +2,7 @@
 //!
 //! This module contains an example of how to implement conditional logic.
 
-use *;
+use crate::*;
 
 /// Our operand type.  An enum to contain multiple types.
 #[derive(Clone, Debug, PartialEq)]

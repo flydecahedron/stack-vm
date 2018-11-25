@@ -1,7 +1,7 @@
 //! A key/value table using strings as keys.
 
 use std::collections::HashMap;
-use table::Table;
+use crate::table::Table;
 
 /// A table which allows values to be overwritten.
 /// Useful for your language's local variables, etc.
@@ -57,7 +57,7 @@ impl<T> Table for WriteManyTable<T> {
 }
 #[cfg(test)]
 mod test {
-    use table::Table;
+    use crate::table::Table;
     use super::*;
 
     #[test]

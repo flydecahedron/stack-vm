@@ -48,7 +48,7 @@ pub trait ToByteCode {
     /// assert_eq!(&buf[..], [0xd]);
     /// # }
     /// ```
-    fn to_byte_code(&self, &mut Write);
+    fn to_byte_code(&self, _: &mut Write);
 }
 
 #[cfg(test)]

@@ -52,7 +52,7 @@
 //! ```
 
 use std::fmt;
-use machine::Machine;
+use crate::machine::Machine;
 
 /// Describes a single instruction which can be used to execute programs.
 ///

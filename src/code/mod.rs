@@ -83,10 +83,10 @@
 //! # }
 //! ```
 
-use builder::Builder;
+use crate::builder::Builder;
 use std::convert::From;
 use std::fmt;
-use table::Table;
+use crate::table::Table;
 mod debug;
 mod from_byte_code;
 mod to_byte_code;
@@ -187,13 +187,13 @@ impl<'a, T: fmt::Debug + PartialEq> From<Builder<'a, T>> for Code<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use from_byte_code::FromByteCode;
-    use instruction::Instruction;
-    use instruction_table::InstructionTable;
-    use machine::Machine;
+    use crate::from_byte_code::FromByteCode;
+    use crate::instruction::Instruction;
+    use crate::instruction_table::InstructionTable;
+    use crate::machine::Machine;
     use rmp::{decode, encode};
     use std::io::{Read, Write};
-    use to_byte_code::ToByteCode;
+    use crate::to_byte_code::ToByteCode;
 
     impl ToByteCode for usize {
         fn to_byte_code(&self, mut buf: &mut Write) {

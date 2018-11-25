@@ -1,4 +1,4 @@
-use from_byte_code::FromByteCode;
+use crate::from_byte_code::FromByteCode;
 use std::io::Read;
 use rmp::decode;
 use std::fmt;

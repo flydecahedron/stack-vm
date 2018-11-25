@@ -2,8 +2,8 @@
 //!
 //! Used internally by the `Machine` to keep track of call scope.
 
-use write_many_table::WriteManyTable;
-use table::Table;
+use crate::write_many_table::WriteManyTable;
+use crate::table::Table;
 
 /// A call frame.
 ///

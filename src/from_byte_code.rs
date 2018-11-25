@@ -41,7 +41,7 @@ pub trait FromByteCode {
     /// assert_eq!(Operand(13), Operand::from_byte_code(&mut &bytecode[..]));
     /// # }
     /// ```
-    fn from_byte_code(&mut Read) -> Self;
+    fn from_byte_code(_: &mut Read) -> Self;
 }
 
 #[cfg(test)]

@@ -2,12 +2,12 @@
 //!
 //! Pour all your ingredients into `Machine` and make it dance.
 
-use code::Code;
-use frame::Frame;
-use instruction_table::InstructionTable;
-use stack::Stack;
+use crate::code::Code;
+use crate::frame::Frame;
+use crate::instruction_table::InstructionTable;
+use crate::stack::Stack;
 use std::fmt;
-use table::Table;
+use crate::table::Table;
 
 /// `Machine` contains all the information needed to run your program.
 ///
@@ -194,10 +194,10 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use builder::Builder;
-    use instruction::Instruction;
-    use instruction_table::InstructionTable;
-    use write_many_table::WriteManyTable;
+    use crate::builder::Builder;
+    use crate::instruction::Instruction;
+    use crate::instruction_table::InstructionTable;
+    use crate::write_many_table::WriteManyTable;
 
     fn push(machine: &mut Machine<usize>, args: &[usize]) {
         let arg = machine.code.data.get(args[0]).unwrap();

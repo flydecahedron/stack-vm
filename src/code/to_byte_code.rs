@@ -1,4 +1,4 @@
-use to_byte_code::ToByteCode;
+use crate::to_byte_code::ToByteCode;
 use std::io::Write;
 use rmp::encode;
 use std::fmt;

@@ -3,7 +3,7 @@
 //! Stores the instructions of your machine and allows them to be retrieved
 //! by name or op code.
 
-use instruction::Instruction;
+use crate::instruction::Instruction;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -57,7 +57,7 @@ impl<T: fmt::Debug> InstructionTable<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use machine::Machine;
+    use crate::machine::Machine;
 
     fn noop(_machine: &mut Machine<usize>, _args: &[usize]) {}
 

@@ -19,10 +19,10 @@
 //! builder.push("push", vec![1.23]);
 //! ```
 
-use instruction_table::InstructionTable;
+use crate::instruction_table::InstructionTable;
 use std::fmt;
-use table::Table;
-use write_once_table::WriteOnceTable;
+use crate::table::Table;
+use crate::write_once_table::WriteOnceTable;
 
 /// The builder struct.
 ///
@@ -157,9 +157,9 @@ impl<'a, T: 'a + fmt::Debug + PartialEq> fmt::Debug for Builder<'a, T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use instruction::Instruction;
-    use instruction_table::InstructionTable;
-    use machine::Machine;
+    use crate::instruction::Instruction;
+    use crate::instruction_table::InstructionTable;
+    use crate::machine::Machine;
 
     fn noop(_machine: &mut Machine<usize>, _args: &[usize]) {}
 

@@ -209,18 +209,18 @@ mod to_byte_code;
 mod write_many_table;
 mod write_once_table;
 
-pub use builder::Builder;
-pub use code::Code;
-pub use frame::Frame;
-pub use from_byte_code::FromByteCode;
-pub use instruction::{Instruction, InstructionFn};
-pub use instruction_table::InstructionTable;
-pub use machine::Machine;
-pub use stack::Stack;
-pub use table::Table;
-pub use to_byte_code::ToByteCode;
-pub use write_many_table::WriteManyTable;
-pub use write_once_table::WriteOnceTable;
+pub use crate::builder::Builder;
+pub use crate::code::Code;
+pub use crate::frame::Frame;
+pub use crate::from_byte_code::FromByteCode;
+pub use crate::instruction::{Instruction, InstructionFn};
+pub use crate::instruction_table::InstructionTable;
+pub use crate::machine::Machine;
+pub use crate::stack::Stack;
+pub use crate::table::Table;
+pub use crate::to_byte_code::ToByteCode;
+pub use crate::write_many_table::WriteManyTable;
+pub use crate::write_once_table::WriteOnceTable;
 
 #[cfg(test)]
 mod acceptance;
