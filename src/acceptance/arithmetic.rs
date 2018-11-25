@@ -5,7 +5,7 @@
 
 use super::super::*;
 
-/// Pushes an piece of data from the data section onto the operand stack.
+/// Pushes a piece of data from the data section onto the operand stack.
 fn push(machine: &mut Machine<f64>, args: &[usize]) {
     let arg = *machine.get_data(args[0]);
     machine.operand_push(arg);

@@ -19,10 +19,13 @@
 //! builder.push("push", vec![1.23]);
 //! ```
 
+mod label;
+mod label_ref;
+
+use self::{label::Label, label_ref::LabelRef};
 use instruction_table::InstructionTable;
 use std::fmt;
 use table::Table;
-use write_once_table::WriteOnceTable;
 
 /// The builder struct.
 ///
@@ -34,15 +37,16 @@ use write_once_table::WriteOnceTable;
 pub struct Builder<'a, T: 'a + fmt::Debug + PartialEq> {
     pub instruction_table: &'a InstructionTable<T>,
     pub instructions: Vec<usize>,
-    pub labels: WriteOnceTable<usize>,
+    pub labels: Vec<Label>,
     pub data: Vec<T>,
 }
 
 impl<'a, T: fmt::Debug + PartialEq> Builder<'a, T> {
     /// Create a new `Builder` from an `InstructionTable`.
     pub fn new(instruction_table: &'a InstructionTable<T>) -> Builder<T> {
-        let mut labels = WriteOnceTable::new();
-        labels.insert("main", 0);
+        let mut main = Label::new("main");
+        main.set_ip(0);
+        let labels = vec![main];
         Builder {
             instruction_table: &instruction_table,
             instructions: vec![],
@@ -79,13 +83,32 @@ impl<'a, T: fmt::Debug + PartialEq> Builder<'a, T> {
         }
     }
 
+    /// Create a new label reference.
+    ///
+    /// This allows you to create a new label without immediately setting it's
+    /// IP.
+    pub fn new_label(&mut self, name: &str) -> LabelRef {
+        let label = Label::new(name);
+        self.labels.push(label);
+        let idx = self.labels.len();
+        LabelRef::new(idx - 1)
+    }
+
+    /// Sets the labels IP to the current IP.
+    pub fn switch_to_label(&mut self, label_ref: LabelRef) {
+        let ip = self.len();
+        let label = &mut self.labels[label_ref.idx()];
+        label.set_ip(ip);
+    }
+
     /// Insert a label at this point in the code.
     ///
     /// Labels are used as targets for jumps.  When you call this method a
     /// label is stored which points to the position of the next instruction.
+    #[deprecated(since = "1.1.0", note = "please use `new_label` instead")]
     pub fn label(&mut self, name: &str) {
-        let idx = self.instructions.len();
-        self.labels.insert(name, idx);
+        let lr = self.new_label(name);
+        self.switch_to_label(lr);
     }
 
     /// Return the length of the instructions vector.
@@ -118,10 +141,10 @@ impl<'a, T: 'a + fmt::Debug + PartialEq> fmt::Debug for Builder<'a, T> {
         let mut ip = 0;
         let len = self.instructions.len();
         loop {
-            for label in self.labels.keys() {
-                let idx = *self.labels.get(label).unwrap();
+            for label in &self.labels {
+                let idx = label.ip().unwrap();
                 if idx == ip {
-                    result.push_str(&format!("\n.{}:\n", label));
+                    result.push_str(&format!("\n.{}:\n", label.name()));
                 }
             }
 
@@ -200,7 +223,9 @@ mod test {
         let mut builder: Builder<usize> = Builder::new(&it);
         builder.push("noop", vec![]);
         builder.label("wow");
-        assert_eq!(*builder.labels.get("wow").unwrap(), 2);
+        let label = builder.labels.pop().unwrap();
+        assert_eq!(label.name(), "wow");
+        assert_eq!(label.ip().unwrap(), 2);
     }
 
     #[test]

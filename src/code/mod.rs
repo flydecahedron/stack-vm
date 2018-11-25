@@ -169,10 +169,10 @@ impl<'a, T: fmt::Debug + PartialEq> From<Builder<'a, T>> for Code<T> {
         let code = builder.instructions;
         let data = builder.data;
         let mut labels = vec![];
-        for key in builder.labels.keys() {
-            let idx = builder.labels.get(key).unwrap();
-            labels.push((*idx, key.clone()));
+        for label in builder.labels {
+            labels.push((label.ip().unwrap(), label.name().to_string()))
         }
+
         labels.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
 
         Code {
