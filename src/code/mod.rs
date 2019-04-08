@@ -84,9 +84,9 @@
 //! ```
 
 use crate::builder::Builder;
+use crate::table::Table;
 use std::convert::From;
 use std::fmt;
-use crate::table::Table;
 mod debug;
 mod from_byte_code;
 mod to_byte_code;
@@ -170,16 +170,16 @@ impl<'a, T: fmt::Debug + PartialEq> From<Builder<'a, T>> for Code<T> {
         let data = builder.data;
         let mut labels = vec![];
         for key in builder.labels.keys() {
-            let idx = builder.labels.get(key).unwrap();
+            let idx = builder.labels.get(&key).unwrap();
             labels.push((*idx, key.clone()));
         }
         labels.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
 
         Code {
-            symbols: symbols,
-            code: code,
-            data: data,
-            labels: labels,
+            symbols,
+            code,
+            data,
+            labels,
         }
     }
 }
@@ -191,9 +191,9 @@ mod test {
     use crate::instruction::Instruction;
     use crate::instruction_table::InstructionTable;
     use crate::machine::Machine;
+    use crate::to_byte_code::ToByteCode;
     use rmp::{decode, encode};
     use std::io::{Read, Write};
-    use crate::to_byte_code::ToByteCode;
 
     impl ToByteCode for usize {
         fn to_byte_code(&self, mut buf: &mut Write) {

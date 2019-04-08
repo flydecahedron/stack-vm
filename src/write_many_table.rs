@@ -1,7 +1,7 @@
 //! A key/value table using strings as keys.
 
-use std::collections::HashMap;
 use crate::table::Table;
+use std::collections::HashMap;
 
 /// A table which allows values to be overwritten.
 /// Useful for your language's local variables, etc.
@@ -25,12 +25,12 @@ use crate::table::Table;
 /// let value = *table.get("example").unwrap();
 /// assert_eq!(value, 14);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct WriteManyTable<T>(HashMap<String, T>);
 
 impl<T> WriteManyTable<T> {
     /// Return a new, empty `WriteManyTable`.
-    pub fn new() ->WriteManyTable<T> {
+    pub fn new() -> WriteManyTable<T> {
         WriteManyTable(HashMap::new())
     }
 }
@@ -57,8 +57,8 @@ impl<T> Table for WriteManyTable<T> {
 }
 #[cfg(test)]
 mod test {
-    use crate::table::Table;
     use super::*;
+    use crate::table::Table;
 
     #[test]
     fn new() {
@@ -76,7 +76,7 @@ mod test {
 
     #[test]
     fn insert_is_mutable() {
-        let mut write_many_table:WriteManyTable<usize> = WriteManyTable::new();
+        let mut write_many_table: WriteManyTable<usize> = WriteManyTable::new();
         write_many_table.insert("example", 13);
         assert_eq!(*write_many_table.get("example").unwrap(), 13);
         write_many_table.insert("example", 14);

@@ -28,7 +28,7 @@ impl<T: fmt::Debug> fmt::Debug for Code<T> {
 
             let op_code = self.code[ip];
             let arity = self.code[ip + 1];
-            ip = ip + 2;
+            ip += 2;
 
             // Print this instruction's name
             for symbol in self.symbols() {
@@ -40,7 +40,7 @@ impl<T: fmt::Debug> fmt::Debug for Code<T> {
 
             for _i in 0..arity {
                 let const_idx = self.code[ip];
-                ip = ip + 1;
+                ip += 1;
                 result.push_str(&format!(" @{}", const_idx));
             }
             result.push_str("\n");

@@ -1,7 +1,7 @@
 //! A key/value table using strings as keys.
 
-use std::collections::HashMap;
 use crate::table::Table;
+use std::collections::HashMap;
 
 /// A table which does not allow values to be overwritten.
 /// Useful for your languages constants, etc.
@@ -26,7 +26,7 @@ use crate::table::Table;
 /// table.insert("example", 13);
 /// table.insert("example", 14);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct WriteOnceTable<T>(HashMap<String, T>);
 
 impl<T> WriteOnceTable<T> {
@@ -41,9 +41,9 @@ impl<T> WriteOnceTable<T> {
         }
     }
 
-    pub fn keys(&self) -> Vec<&String> {
+    pub fn keys(&self) -> Vec<String> {
         let mut result = vec![];
-        self.0.keys().for_each(|ref k| result.push(k.clone()));
+        self.0.keys().for_each(|ref k| result.push(k.to_string()));
         result
     }
 }
@@ -72,8 +72,8 @@ impl<T> Table for WriteOnceTable<T> {
 
 #[cfg(test)]
 mod test {
-    use crate::table::Table;
     use super::*;
+    use crate::table::Table;
 
     #[test]
     fn new() {

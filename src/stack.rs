@@ -18,11 +18,10 @@ use std::fmt;
 /// let value = stack.pop();
 /// assert_eq!(value, 13);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Stack<T>(Vec<T>);
 
 impl<T: fmt::Debug> Stack<T> {
-
     /// Create a new empty `Stack` and return it.
     pub fn new() -> Stack<T> {
         Stack(vec![])
@@ -46,14 +45,18 @@ impl<T: fmt::Debug> Stack<T> {
     /// Take a sneaky look at the top element on the stack.
     pub fn peek(&self) -> &T {
         let len = self.0.len();
-        if len == 0 { panic!("Cannot peek into empty stack!") }
+        if len == 0 {
+            panic!("Cannot peek into empty stack!")
+        }
         &self.0[len - 1]
     }
 
     /// Make a sneaky change to the top element on the stack.
     pub fn peek_mut(&mut self) -> &mut T {
         let len = self.0.len();
-        if len == 0 { panic!("Cannot peek into empty stack!") }
+        if len == 0 {
+            panic!("Cannot peek into empty stack!")
+        }
         &mut self.0[len - 1]
     }
 

@@ -4,6 +4,7 @@
 //! verify it's output.
 
 use super::super::*;
+use std::f64;
 
 /// Pushes an piece of data from the data section onto the operand stack.
 fn push(machine: &mut Machine<f64>, args: &[usize]) {
@@ -67,7 +68,7 @@ fn addition_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert_eq!(result, 9.0);
+    assert!(result - 9.0 < f64::EPSILON);
 }
 
 #[test]
@@ -83,7 +84,7 @@ fn subtraction_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert_eq!(result, 5.0);
+    assert!(result - 5.0 < f64::EPSILON);
 }
 
 #[test]
@@ -97,7 +98,7 @@ fn division_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert_eq!(result, 0.75);
+    assert!(result - 0.75 < f64::EPSILON);
 }
 
 #[test]
@@ -111,5 +112,5 @@ fn multiplication_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert_eq!(result, 12.0);
+    assert!(result - 12.0 < f64::EPSILON);
 }
