@@ -90,10 +90,10 @@ impl<T: fmt::Debug> Instruction<T> {
     /// Create a new instruction.
     pub fn new(op_code: usize, name: &str, arity: usize, fun: InstructionFn<T>) -> Instruction<T> {
         Instruction {
-            op_code: op_code,
+            op_code,
             name: String::from(name),
-            arity: arity,
-            fun: fun
+            arity,
+            fun
         }
 
     }

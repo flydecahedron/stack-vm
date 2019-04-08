@@ -20,9 +20,9 @@
 //! ```
 
 use crate::instruction_table::InstructionTable;
-use std::fmt;
 use crate::table::Table;
 use crate::write_once_table::WriteOnceTable;
+use std::fmt;
 
 /// The builder struct.
 ///
@@ -46,7 +46,7 @@ impl<'a, T: fmt::Debug + PartialEq> Builder<'a, T> {
         Builder {
             instruction_table: &instruction_table,
             instructions: vec![],
-            labels: labels,
+            labels,
             data: vec![],
         }
     }
@@ -60,7 +60,7 @@ impl<'a, T: fmt::Debug + PartialEq> Builder<'a, T> {
         let instr = self
             .instruction_table
             .by_name(name)
-            .expect(&format!("Unable to find instruction with name {:?}", name));
+            .unwrap_or_else(|| panic!("Unable to find instruction with name {:?}", name));
 
         if args.len() != instr.arity {
             panic!(
@@ -95,6 +95,11 @@ impl<'a, T: fmt::Debug + PartialEq> Builder<'a, T> {
         self.instructions.len()
     }
 
+    /// Return whether the Builder contains any instructions.
+    pub fn is_empty(&self) -> bool {
+        self.instructions.is_empty()
+    }
+
     fn push_data(&mut self, data: T) -> usize {
         let pos = self.data.iter().position(|d| d == &data);
         match pos {
@@ -119,7 +124,7 @@ impl<'a, T: 'a + fmt::Debug + PartialEq> fmt::Debug for Builder<'a, T> {
         let len = self.instructions.len();
         loop {
             for label in self.labels.keys() {
-                let idx = *self.labels.get(label).unwrap();
+                let idx = *self.labels.get(&label).unwrap();
                 if idx == ip {
                     result.push_str(&format!("\n.{}:\n", label));
                 }
@@ -130,24 +135,24 @@ impl<'a, T: 'a + fmt::Debug + PartialEq> fmt::Debug for Builder<'a, T> {
             }
 
             let op_code = self.instructions[ip];
-            ip = ip + 1;
+            ip += 1;
             let arity = self.instructions[ip];
 
-            let instr = self.instruction_table.by_op_code(op_code).expect(&format!(
-                "Unable to find instruction with op code {}",
-                op_code
-            ));
+            let instr = self
+                .instruction_table
+                .by_op_code(op_code)
+                .unwrap_or_else(|| panic!("Unable to find instruction with op code {}", op_code));
 
             result.push_str(&format!("\t{}", &instr.name));
 
             for _j in 0..arity {
-                ip = ip + 1;
+                ip += 1;
                 let const_idx = self.instructions[ip];
                 result.push_str(&format!(" @{}", const_idx));
             }
             result.push_str("\n");
 
-            ip = ip + 1;
+            ip += 1;
         }
 
         write!(f, "{}", result)

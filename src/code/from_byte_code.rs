@@ -55,10 +55,10 @@ impl<T: FromByteCode + fmt::Debug> FromByteCode for Code<T> {
         }
 
         Code {
-            symbols: symbols,
-            code:    code,
-            data:    data,
-            labels:  labels
+            symbols,
+            code,
+            data,
+            labels
         }
     }
 }

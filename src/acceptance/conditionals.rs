@@ -14,14 +14,14 @@ enum Operand {
 impl Operand {
     fn to_i(&self) -> Option<i64> {
         match self {
-            &Operand::I(i) => Some(i),
+            Operand::I(i) => Some(*i),
             _ => None,
         }
     }
 
     fn to_s(&self) -> Option<&str> {
         match self {
-            &Operand::S(ref s) => Some(s),
+            Operand::S(ref s) => Some(s),
             _ => None,
         }
     }

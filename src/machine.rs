@@ -6,8 +6,8 @@ use crate::code::Code;
 use crate::frame::Frame;
 use crate::instruction_table::InstructionTable;
 use crate::stack::Stack;
-use std::fmt;
 use crate::table::Table;
+use std::fmt;
 
 /// `Machine` contains all the information needed to run your program.
 ///
@@ -41,11 +41,11 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
         call_stack.push(frame);
 
         Machine {
-            code: code,
-            instruction_table: instruction_table,
+            code,
+            instruction_table,
             ip: 0,
-            constants: constants,
-            call_stack: call_stack,
+            constants,
+            call_stack,
             operand_stack: Stack::new(),
         }
     }
@@ -69,10 +69,10 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
             let op_code = self.next_code();
             let arity = self.next_code();
 
-            let instr = self.instruction_table.by_op_code(op_code).expect(&format!(
-                "Unable to find instruction with op code {}",
-                op_code
-            ));
+            let instr = self
+                .instruction_table
+                .by_op_code(op_code)
+                .unwrap_or_else(|| panic!("Unable to find instruction with op code {}", op_code));
 
             let mut args: Vec<usize> = vec![];
 
@@ -90,7 +90,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     #[inline]
     fn next_code(&mut self) -> usize {
         let code = self.code.code[self.ip];
-        self.ip = self.ip + 1;
+        self.ip += 1;
         code
     }
 
@@ -139,7 +139,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
         self.code
             .data
             .get(idx)
-            .expect(&format!("Constant data is not present at index {}.", idx))
+            .unwrap_or_else(|| panic!("Constant data is not present at index {}.", idx))
     }
 
     /// Perform a jump to a named label.
@@ -153,7 +153,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
         self.ip = self
             .code
             .get_label_ip(label)
-            .expect(&format!("Attempted to jump to unknown label {}", label));
+            .unwrap_or_else(|| panic!("Attempted to jump to unknown label {}", label));
     }
 
     /// Performs a call to a named label.
@@ -200,7 +200,7 @@ mod test {
     use crate::write_many_table::WriteManyTable;
 
     fn push(machine: &mut Machine<usize>, args: &[usize]) {
-        let arg = machine.code.data.get(args[0]).unwrap();
+        let arg = &machine.code.data[args[0]];
         machine.operand_stack.push(*arg);
     }
 

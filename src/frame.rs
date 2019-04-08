@@ -22,7 +22,7 @@ impl<T> Frame<T> {
     pub fn new(return_address: usize) -> Frame<T> {
         Frame {
             locals: WriteManyTable::new(),
-            return_address: return_address
+            return_address
         }
     }
 
