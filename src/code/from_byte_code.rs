@@ -5,7 +5,7 @@ use std::fmt;
 use super::Code;
 
 impl<T: FromByteCode + fmt::Debug> FromByteCode for Code<T> {
-    fn from_byte_code(mut buf: &mut Read) -> Code<T> {
+    fn from_byte_code(mut buf: &mut dyn Read) -> Code<T> {
         // We expect a four-element map.
         let map_len = decode::read_map_len(&mut buf).unwrap();
         assert_eq!(map_len, 4);
@@ -63,7 +63,7 @@ impl<T: FromByteCode + fmt::Debug> FromByteCode for Code<T> {
     }
 }
 
-fn read_string(mut buf: &mut Read) -> String {
+fn read_string(mut buf: &mut dyn Read) -> String {
     let len = decode::read_str_len(&mut buf).unwrap();
     let mut strbuf: Vec<u8> = vec![0u8; len as usize];
     buf.read_exact(&mut strbuf).unwrap();

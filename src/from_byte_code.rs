@@ -31,7 +31,7 @@ pub trait FromByteCode {
     /// struct Operand(i64);
     ///
     /// impl FromByteCode for Operand {
-    ///     fn from_byte_code(mut buf: &mut Read) -> Operand {
+    ///     fn from_byte_code(mut buf: &mut dyn Read) -> Operand {
     ///         let value = rmp::decode::read_int(&mut buf).unwrap();
     ///         Operand(value)
     ///     }
@@ -41,7 +41,7 @@ pub trait FromByteCode {
     /// assert_eq!(Operand(13), Operand::from_byte_code(&mut &bytecode[..]));
     /// # }
     /// ```
-    fn from_byte_code(_: &mut Read) -> Self;
+    fn from_byte_code(_: &mut dyn Read) -> Self;
 }
 
 #[cfg(test)]
@@ -53,7 +53,7 @@ mod test {
     struct Operand(i64);
 
     impl FromByteCode for Operand {
-        fn from_byte_code(mut buf: &mut Read) -> Operand {
+        fn from_byte_code(mut buf: &mut dyn Read) -> Operand {
             let i = rmp::decode::read_int(&mut buf).unwrap();
             Operand(i)
         }

@@ -21,7 +21,7 @@ pub struct Machine<'a, T: 'a + fmt::Debug> {
     pub code: Code<T>,
     pub instruction_table: &'a InstructionTable<T>,
     pub ip: usize,
-    pub constants: &'a Table<Item = T>,
+    pub constants: &'a dyn Table<Item = T>,
     pub call_stack: Stack<Frame<T>>,
     pub operand_stack: Stack<T>,
 }
@@ -33,7 +33,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
     /// all the code and data of your program, and a `Table` of constants`.
     pub fn new(
         code: Code<T>,
-        constants: &'a Table<Item = T>,
+        constants: &'a dyn Table<Item = T>,
         instruction_table: &'a InstructionTable<T>,
     ) -> Machine<'a, T> {
         let frame: Frame<T> = Frame::new(code.code.len());

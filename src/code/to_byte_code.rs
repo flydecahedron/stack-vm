@@ -16,7 +16,7 @@ impl<T: ToByteCode + fmt::Debug> ToByteCode for Code<T> {
     ///     "labels" => [ 0, "main" ]
     /// }
     /// ```
-    fn to_byte_code(&self, mut buf: &mut Write) {
+    fn to_byte_code(&self, mut buf: &mut dyn Write) {
         // We're creating a 4-element map.
         encode::write_map_len(&mut buf, 4).unwrap();
 

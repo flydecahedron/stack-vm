@@ -37,7 +37,7 @@ pub trait ToByteCode {
     /// struct Operand(i64);
     ///
     /// impl ToByteCode for Operand {
-    ///     fn to_byte_code(&self, mut buf: &mut Write) {
+    ///     fn to_byte_code(&self, mut buf: &mut dyn Write) {
     ///         rmp::encode::write_sint(&mut buf, self.0).unwrap();
     ///     }
     /// }
@@ -48,7 +48,7 @@ pub trait ToByteCode {
     /// assert_eq!(&buf[..], [0xd]);
     /// # }
     /// ```
-    fn to_byte_code(&self, _: &mut Write);
+    fn to_byte_code(&self, _: &mut dyn Write);
 }
 
 #[cfg(test)]
@@ -59,7 +59,7 @@ mod test {
     struct Operand(i64);
 
     impl ToByteCode for Operand {
-        fn to_byte_code(&self, mut buf: &mut Write) {
+        fn to_byte_code(&self, mut buf: &mut dyn Write) {
             rmp::encode::write_sint(&mut buf, self.0).unwrap();
         }
     }

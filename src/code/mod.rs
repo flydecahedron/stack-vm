@@ -196,13 +196,13 @@ mod test {
     use std::io::{Read, Write};
 
     impl ToByteCode for usize {
-        fn to_byte_code(&self, mut buf: &mut Write) {
+        fn to_byte_code(&self, mut buf: &mut dyn Write) {
             encode::write_uint(&mut buf, *self as u64).unwrap();
         }
     }
 
     impl FromByteCode for usize {
-        fn from_byte_code(mut buf: &mut Read) -> usize {
+        fn from_byte_code(mut buf: &mut dyn Read) -> usize {
             decode::read_int(&mut buf).unwrap()
         }
     }
