@@ -16,7 +16,6 @@
 //!
 //! fn example_noop(_machine: &mut Machine<Operand>, _args: &[usize]) {}
 //!
-//! # fn main() {
 //! let mut instruction_table = InstructionTable::new();
 //! instruction_table.insert(Instruction::new(1, "push", 1, example_noop));
 //!
@@ -25,7 +24,6 @@
 //! builder.push("push", vec![Operand(14)]);
 //!
 //! Code::from(builder);
-//! # }
 //! ```
 //!
 //! ## Creating code from bytecode
