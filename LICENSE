@@ -1,7 +1,7 @@
 The MIT License (MIT)
 =====================
 
-Copyright © 2019 Automat Software Limited (New Zealand).
+Copyright © 2019 James Harton.
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
