@@ -68,7 +68,7 @@ fn addition_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert!(result - 9.0 < f64::EPSILON);
+    assert!((result - 9.0).abs() < f64::EPSILON);
 }
 
 #[test]
@@ -84,7 +84,7 @@ fn subtraction_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert!(result - 5.0 < f64::EPSILON);
+    assert!((result - 5.0).abs() < f64::EPSILON);
 }
 
 #[test]
@@ -98,7 +98,7 @@ fn division_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert!(result - 0.75 < f64::EPSILON);
+    assert!((result - 0.75).abs() < f64::EPSILON);
 }
 
 #[test]
@@ -112,5 +112,5 @@ fn multiplication_example() {
     let mut machine = Machine::new(Code::from(builder), &constants, &it);
     machine.run();
     let result = machine.operand_pop();
-    assert!(result - 12.0 < f64::EPSILON);
+    assert!((result - 12.0).abs() < f64::EPSILON);
 }
