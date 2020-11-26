@@ -43,7 +43,7 @@ impl<T: fmt::Debug> fmt::Debug for Code<T> {
                 ip += 1;
                 result.push_str(&format!(" @{}", const_idx));
             }
-            result.push_str("\n");
+            result.push('\n');
         }
 
         write!(f, "{}", result)
