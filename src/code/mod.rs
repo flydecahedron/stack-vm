@@ -224,14 +224,14 @@ mod test {
         let code: Code<usize> = Code::from(builder);
 
         assert_eq!(code.symbols().len(), 3);
-        assert_eq!(code.symbols()[0], (0 as usize, "noop".to_string()));
-        assert_eq!(code.symbols()[1], (1 as usize, "push".to_string()));
-        assert_eq!(code.symbols()[2], (2 as usize, "pop".to_string()));
+        assert_eq!(code.symbols()[0], (0_usize, "noop".to_string()));
+        assert_eq!(code.symbols()[1], (1_usize, "push".to_string()));
+        assert_eq!(code.symbols()[2], (2_usize, "pop".to_string()));
 
         assert_eq!(code.code(), [1, 1, 0, 1, 1, 1]);
         assert_eq!(code.data(), [13, 14]);
         assert_eq!(code.labels().len(), 1);
-        assert_eq!(code.labels()[0], (0 as usize, "main".to_string()));
+        assert_eq!(code.labels()[0], (0_usize, "main".to_string()));
     }
 
     #[test]
@@ -308,16 +308,16 @@ mod test {
         assert_eq!(
             code.symbols,
             [
-                (0 as usize, "noop".to_string()),
-                (1 as usize, "push".to_string()),
-                (2 as usize, "pop".to_string())
+                (0_usize, "noop".to_string()),
+                (1_usize, "push".to_string()),
+                (2_usize, "pop".to_string())
             ]
         );
         assert_eq!(
             code.labels,
             [
-                (0 as usize, "main".to_string()),
-                (8 as usize, "some_function".to_string())
+                (0_usize, "main".to_string()),
+                (8_usize, "some_function".to_string())
             ]
         )
     }
