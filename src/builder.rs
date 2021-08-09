@@ -44,7 +44,7 @@ impl<'a, T: fmt::Debug + PartialEq> Builder<'a, T> {
         let mut labels = WriteOnceTable::new();
         labels.insert("main", 0);
         Builder {
-            instruction_table: &instruction_table,
+            instruction_table,
             instructions: vec![],
             labels,
             data: vec![],

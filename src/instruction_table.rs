@@ -26,7 +26,7 @@ impl<T: fmt::Debug> InstructionTable<T> {
 
     /// Retrieve an instruction by looking up it's name.
     pub fn by_name(&self, name: &str) -> Option<&Instruction<T>> {
-        self.0.values().find(|ref instr| instr.name == name)
+        self.0.values().find(|instr| instr.name == name)
     }
 
     /// Insert an instruction into the table.
@@ -45,7 +45,7 @@ impl<T: fmt::Debug> InstructionTable<T> {
     /// each instruction.
     pub fn symbols(&self) -> Vec<(usize, String)> {
         let mut result = vec![];
-        self.0.keys().for_each(|ref key| {
+        self.0.keys().for_each(|key| {
             let instr = &self.0[key];
             result.push((instr.op_code, instr.name.clone()));
         });
