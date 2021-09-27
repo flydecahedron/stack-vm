@@ -1,14 +1,12 @@
 [package]
 name = "stack-vm"
 version = "1.0.1"
-authors = ["James Harton <james@harton.nz>"]
+authors = ["James Harton <james@harton.nz>", "flydecahedron <flydecahedron@gmail.com"]
 license = "MIT"
 description = "A generic, reusable, stack-based virtual machine."
-repository = "https://gitlab.com/huia-lang/stack-vm"
+repository = "https://github.com/flydecahedron/stack-vm"
 readme = "README.md"
-
-[badges]
-gitlab = { repository = "huia-lang/stack-vm" }
 
 [dependencies]
 rmp = "^0.8"
+shipyard = { git = "https://github.com/leudz/shipyard", features = ["proc"] }

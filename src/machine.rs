@@ -9,6 +9,10 @@ use crate::stack::Stack;
 use crate::table::Table;
 use std::fmt;
 
+// TODO why is this needed to use a dep?
+extern crate shipyard;
+use machine::shipyard::World;
+
 /// `Machine` contains all the information needed to run your program.
 ///
 /// * A `Code`, used describe the source instructions and data to execute.
@@ -24,6 +28,7 @@ pub struct Machine<'a, T: 'a + fmt::Debug> {
     pub constants: &'a dyn Table<Item = T>,
     pub call_stack: Stack<Frame<T>>,
     pub operand_stack: Stack<T>,
+    pub world: World,
 }
 
 impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
@@ -47,6 +52,7 @@ impl<'a, T: 'a + fmt::Debug> Machine<'a, T> {
             constants,
             call_stack,
             operand_stack: Stack::new(),
+            world: World::new(),
         }
     }
 
